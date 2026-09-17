@@ -248,4 +248,23 @@ class ExpensesDatabase {
         (row['total'] as num).toDouble(),
     };
   }
+  Future<Budget?> getBudgetByCategory(
+      String category,
+      String month,
+      ) async {
+    final db = await database;
+
+    final result = await db.query(
+      'budgets',
+      where: 'category = ? AND month = ?',
+      whereArgs: [category, month],
+      limit: 1,
+    );
+
+    if (result.isEmpty) {
+      return null;
+    }
+
+    return Budget.fromMap(result.first);
+  }
 }

@@ -37,4 +37,13 @@ class BudgetRepository {
       endDate,
     );
   }
+  Future<Budget?> getBudgetByCategory(
+      String category,
+      String month,
+      ) async {
+    return await database.getBudgetByCategory(
+      category,
+      month,
+    );
+  }
 }

@@ -43,18 +43,15 @@ class _AddBudgetScreenState extends State<AddBudgetScreen> {
       return;
     }
 
-    final now = DateTime.now();
-
-    final month =
-        '${now.year}-${now.month.toString().padLeft(2, '0')}';
+    final controller = context.read<BudgetController>();
 
     final budget = Budget(
       category: selectedCategory,
       amount: amount,
-      month: month,
+      month: controller.currentMonth,
     );
 
-    await context.read<BudgetController>().addBudget(budget);
+    await controller.addBudget(budget);
 
     if (!mounted) return;
 

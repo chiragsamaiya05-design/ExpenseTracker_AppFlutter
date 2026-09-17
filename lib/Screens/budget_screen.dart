@@ -18,28 +18,9 @@ class _BudgetScreenState extends State<BudgetScreen> {
     super.initState();
 
     Future.microtask(() {
-      final controller = context.read<BudgetController>();
+      final controller = context.read<BudgetController>().loadBudgetData();
 
-      final now = DateTime.now();
 
-      final month =
-          '${now.year}-${now.month.toString().padLeft(2, '0')}';
-
-      final startDate =
-          '${now.year}-${now.month.toString().padLeft(2, '0')}-01';
-
-      final lastDay =
-          DateTime(now.year, now.month + 1, 0).day;
-
-      final endDate =
-          '${now.year}-${now.month.toString().padLeft(2, '0')}-$lastDay';
-
-      controller.loadBudgets(month);
-
-      controller.loadCategoryExpenses(
-        startDate,
-        endDate,
-      );
     });
   }
 

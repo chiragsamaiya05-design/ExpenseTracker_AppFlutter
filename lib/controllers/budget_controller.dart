@@ -15,6 +15,27 @@ class BudgetController extends ChangeNotifier {
   bool get isLoading => _isLoading;
   Map<String, double> _categoryExpenses = {};
   Map<String, double> get categoryExpenses => _categoryExpenses;
+  String get startDate {
+    final now = DateTime.now();
+
+    return '${now.year}-${now.month.toString().padLeft(2, '0')}-01';
+  }
+  String get endDate {
+    final now = DateTime.now();
+
+    final lastDay = DateTime(
+      now.year,
+      now.month + 1,
+      0,
+    ).day;
+
+    return '${now.year}-${now.month.toString().padLeft(2, '0')}-$lastDay';
+  }
+  String get currentMonth {
+    final now = DateTime.now();
+
+    return '${now.year}-${now.month.toString().padLeft(2, '0')}';
+  }
 
   Future<void> loadBudgets(String month) async {
     _isLoading = true;
@@ -27,9 +48,26 @@ class BudgetController extends ChangeNotifier {
   }
 
   Future<void> addBudget(Budget budget) async {
-    await repository.addBudget(budget);
+    final existingBudget =
+    await repository.getBudgetByCategory(
+      budget.category,
+      budget.month,
+    );
 
-    await loadBudgets(budget.month);
+    if (existingBudget != null) {
+      final updatedBudget = Budget(
+        id: existingBudget.id,
+        category: budget.category,
+        amount: budget.amount,
+        month: budget.month,
+      );
+
+      await repository.updateBudget(updatedBudget);
+    } else {
+      await repository.addBudget(budget);
+    }
+
+    await loadBudgetData();
   }
 
   Future<void> updateBudget(Budget budget) async {
@@ -60,11 +98,11 @@ class BudgetController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> loadBudgetData(String month, String startDate, String endDate,) async {
+  Future<void> loadBudgetData() async {
     _isLoading = true;
     notifyListeners();
 
-    _budgets = await repository.getBudget(month);
+    _budgets = await repository.getBudget(currentMonth);
 
     _categoryExpenses =
     await repository.getMonthlyCategoryExpenses(
@@ -91,4 +129,5 @@ class BudgetController extends ChangeNotifier {
     }
     return 'normal';
   }
+
 }
