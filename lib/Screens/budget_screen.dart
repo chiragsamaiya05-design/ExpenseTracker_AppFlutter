@@ -63,6 +63,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
           final spend = controller.categoryExpenses[budget.category]??0.0;
           final per = budget.amount == 0 ? 0.0 : spend/budget.amount;
           final remaining = budget.amount - spend;
+          final status = controller.getBudgetStatus(budget);
 
           return Card(
             margin: const EdgeInsets.all(10),
@@ -92,11 +93,25 @@ class _BudgetScreenState extends State<BudgetScreen> {
                   
                   const SizedBox(height: 10,),
                   
-                  Text(
-                    remaining >=0
-                        ? 'Remaining ${remaining.toStringAsFixed(2)}'
-                        : 'Exceed by ${(-remaining).toStringAsFixed(2)}'
-                  ),
+                  Text('${(per*100).toStringAsFixed(0)}% Used'),
+
+                  const SizedBox(height: 8),
+
+                  if (status == 'warning')
+                    const Text(
+                      '⚠️ You are close to your budget limit',
+                    ),
+
+                  if (status == 'exceeded')
+                    Text(
+                      '🚨 Exceeded by ₹${(-remaining).toStringAsFixed(2)}',
+                    ),
+
+                  if (status == 'normal')
+                    Text(
+                      'Remaining: ₹${remaining.toStringAsFixed(2)}',
+                    ),
+
                 ],
               ),
             ),

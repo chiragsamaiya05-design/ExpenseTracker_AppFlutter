@@ -75,4 +75,20 @@ class BudgetController extends ChangeNotifier {
     _isLoading = false;
     notifyListeners();
   }
+
+  String getBudgetStatus(Budget budget){
+    final spend = _categoryExpenses[budget.category]??0.0;
+    if (budget.amount == 0){
+      return 'No Budget';
+    }
+    final per = spend /budget.amount;
+
+    if (per >= 1.0){
+      return 'exceed';
+    }
+    if (per >= 0.8){
+      return 'Warning';
+    }
+    return 'normal';
+  }
 }
