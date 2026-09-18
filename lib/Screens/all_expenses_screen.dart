@@ -1,77 +1,55 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../controllers/expense_controller.dart';
 import '../widgets/expense_list_item.dart';
-import 'package:expense_tracker/widgets/expense_filter_bottom_sheet.dart';
+import '../widgets/expense_filter_bottom_sheet.dart';
 import '../utils/confirmation_dailog.dart';
 import 'edit_expense_screen.dart';
-import '../database/expenses_DataBase.dart';
-import '../repositories/expense_repository.dart';
 
 
-
-class AllExpensesScreen extends StatefulWidget {
+class AllExpensesScreen extends StatelessWidget {
   const AllExpensesScreen({super.key});
 
-  @override
-  State<AllExpensesScreen> createState() => _AllExpensesScreenState();
-}
+  void showFilterBottomSheet(BuildContext context) {
+    final controller = context.read<ExpenseController>();
 
-class _AllExpensesScreenState extends State<AllExpensesScreen> {
-  final ExpenseController controller = ExpenseController(
-    repository: ExpenseRepository(
-      database: ExpensesDatabase(),
-    ),
-  );
-
-
-
-  Future<void> loadExpenses() async {
-    await controller.loadExpenses();
-
-    if (mounted) {
-      setState(() {});
-    }
-  }
-  void showFilterBottomSheet() {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (context) {
+      builder: (bottomSheetContext) {
         return ExpenseFilterBottomSheet(
           selectedCategory: controller.selectedCategory,
           selectedSort: controller.selectedSort,
           selectedDate: controller.selectedDate,
 
           onApply: (category, sort, date) {
-            setState(() {
-              controller.selectedCategory = category;
-              controller.selectedSort = sort;
-              controller.selectedDate = date;
-            });
+            controller.setFilters(
+              category,
+              sort,
+              date,
+            );
+
+            Navigator.pop(bottomSheetContext);
           },
 
           onClear: () {
-            setState(() {
-              controller.selectedCategory = "All";
-              controller.selectedSort = "Newest";
-              controller.selectedDate = "All";
-            });
+            controller.setFilters(
+              "All",
+              "Newest",
+              "All",
+            );
+
+            Navigator.pop(bottomSheetContext);
           },
         );
       },
     );
   }
 
-
-  @override
-  void initState() {
-    super.initState();
-    loadExpenses();
-  }
-
   @override
   Widget build(BuildContext context) {
+    final controller = context.watch<ExpenseController>();
 
     return Scaffold(
       appBar: AppBar(
@@ -80,55 +58,92 @@ class _AllExpensesScreenState extends State<AllExpensesScreen> {
           IconButton(
             icon: const Icon(Icons.filter_list),
             onPressed: () {
-              showFilterBottomSheet();
+              showFilterBottomSheet(context);
             },
           ),
         ],
       ),
+      body: _buildBody(context, controller),
+    );
+  }
 
-      body: ListView.builder(
-        itemCount: controller.allFilteredExpenses.length,
-        itemBuilder: (context, index) {
-          final expense = controller.allFilteredExpenses[index];
+  Widget _buildBody(
+      BuildContext context,
+      ExpenseController controller,
+      ) {
+    if (controller.isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
 
-          return ExpenseListItem(
-            expense: expense,
+    if (controller.errorMessage != null) {
+      return Center(
+        child: Text(
+          controller.errorMessage!,
+          style: const TextStyle(
+            fontSize: 16,
+          ),
+        ),
+      );
+    }
 
-            onEdit: () async {
-              final updatedExpense = await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => EditExpenseScreen(
+    if (controller.allFilteredExpenses.isEmpty) {
+      return const Center(
+        child: Text(
+          "No expenses found",
+          style: TextStyle(
+            fontSize: 18,
+          ),
+        ),
+      );
+    }
+
+    return ListView.builder(
+      itemCount: controller.allFilteredExpenses.length,
+      itemBuilder: (context, index) {
+        final expense =
+        controller.allFilteredExpenses[index];
+
+        return ExpenseListItem(
+          expense: expense,
+
+          onEdit: () async {
+            final updatedExpense = await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) {
+                  return EditExpenseScreen(
                     expense: expense,
-                  ),
-                ),
+                  );
+                },
+              ),
+            );
+
+            if (updatedExpense != null) {
+              await controller.updateExpense(
+                updatedExpense,
               );
+            }
+          },
 
-              if (updatedExpense != null) {
-                await controller.updateExpense(updatedExpense);
-                if (mounted) {
-                  setState(() {});
-                }
-              }
-            },
+          onDelete: () async {
+            final confirmed =
+            await showConfirmationDialog(
+              context,
+              title: "Delete Expense",
+              message:
+              "Are you sure you want to delete this expense?",
+            );
 
-            onDelete: () async {
-              final confirmed = await showConfirmationDialog(
-                context,
-                title: "Delete Expense",
-                message: "Are you sure you want to delete this expense?",
+            if (confirmed) {
+              await controller.deleteExpense(
+                expense.id!,
               );
-
-              if (confirmed) {
-                await controller.deleteExpense(expense.id!);
-                if (mounted) {
-                  setState(() {});
-                }
-              }
-            },
-          );
-        },
-      ),
+            }
+          },
+        );
+      },
     );
   }
 }

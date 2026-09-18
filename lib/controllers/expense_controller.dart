@@ -15,6 +15,8 @@ class ExpenseController extends ChangeNotifier {
   String selectedSort = "Newest";
   String selectedCategory = "All";
   String selectedDate = "All";
+  bool isLoading = false;
+  String? errorMessage;
 
   double get totalExpense {
     return expenses.fold(
@@ -32,14 +34,21 @@ class ExpenseController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> loadExpenses() async {
-    final data = await repository.getExpenses();
-
-    expenses.clear();
-    expenses.addAll(data);
-
-    notifyListeners();
-  }
+ Future<void> loadExpenses() async{
+    try{
+      isLoading = true;
+      errorMessage =null;
+      notifyListeners();
+      final data = await repository.getExpenses();
+      expenses.clear();
+      expenses.addAll(data);
+    }catch(e){
+      errorMessage = "Failed to load expenses";
+    }finally{
+      isLoading = false;
+      notifyListeners();
+ }
+ }
 
   Future<void> loadIncome() async {
     final income = await repository.getMonthlyIncome();
@@ -58,22 +67,35 @@ class ExpenseController extends ChangeNotifier {
   }
 
   Future<void> addExpense(Expense expense) async {
-    await repository.addExpense(expense);
-
-    await loadExpenses();
+    try {
+      await repository.addExpense(expense);
+      await loadExpenses();
+    }catch(e){
+      errorMessage = "Failed to add expense";
+      notifyListeners();
+    }
   }
 
   Future<void> updateExpense(Expense expense) async {
-    await repository.updateExpense(expense);
-
-    await loadExpenses();
+    try {
+      await repository.updateExpense(expense);
+      await loadExpenses();
+    }catch(e){
+      errorMessage = "Failed to update expense";
+      notifyListeners();
+    }
   }
 
   Future<void> deleteExpense(int id) async {
-    
-    await repository.deleteExpense(id);
-    await loadExpenses();
+    try {
+      await repository.deleteExpense(id);
+      await loadExpenses();
+    }catch(e){
+      errorMessage = "Failed to delete expense";
+      notifyListeners();
+    }
   }
+
   List<Expense> get displayExpenses {
     final result = expenses.where((expense) {
       return expense.title
@@ -145,6 +167,18 @@ class ExpenseController extends ChangeNotifier {
   }
   void setSearchText(String value) {
     searchText = value;
+    notifyListeners();
+  }
+
+  void setFilters(
+      String category,
+      String sort,
+      String date,
+      ) {
+    selectedCategory = category;
+    selectedSort = sort;
+    selectedDate = date;
+
     notifyListeners();
   }
 }
