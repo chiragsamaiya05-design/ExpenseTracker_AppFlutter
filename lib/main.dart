@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -13,14 +15,16 @@ import 'Screens/home_screen.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main(){
-  sqfliteFfiInit();
-  databaseFactory = databaseFactoryFfi;
+  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
+  }
   runApp(
     MultiProvider(
       providers: [
        ChangeNotifierProvider(
         create: (_) => ExpenseController(
-          repository: ExpenseRepository(
+           ExpenseRepository(
             database: ExpensesDatabase(),
           ),
         ),
@@ -48,7 +52,7 @@ class ExpenseTracker extends StatelessWidget{
   Widget build(BuildContext context){
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const HomeScreen(),
+      home:  HomeScreen(),
     );
   }
 }

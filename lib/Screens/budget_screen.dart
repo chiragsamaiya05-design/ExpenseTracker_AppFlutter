@@ -4,25 +4,8 @@ import 'package:provider/provider.dart';
 import '../controllers/budget_controller.dart';
 import 'add_budget_screen.dart';
 
-class BudgetScreen extends StatefulWidget {
+class BudgetScreen extends StatelessWidget {
   const BudgetScreen({super.key});
-
-  @override
-  State<BudgetScreen> createState() => _BudgetScreenState();
-}
-
-class _BudgetScreenState extends State<BudgetScreen> {
-
-  @override
-  void initState() {
-    super.initState();
-
-    Future.microtask(() {
-      final controller = context.read<BudgetController>().loadBudgetData();
-
-
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -80,12 +63,12 @@ class _BudgetScreenState extends State<BudgetScreen> {
 
                   if (status == 'warning')
                     const Text(
-                      '⚠️ You are close to your budget limit',
+                      ' You are close to your budget limit',
                     ),
 
                   if (status == 'exceeded')
                     Text(
-                      '🚨 Exceeded by ₹${(-remaining).toStringAsFixed(2)}',
+                      ' Exceeded by ₹${(-remaining).toStringAsFixed(2)}',
                     ),
 
                   if (status == 'normal')

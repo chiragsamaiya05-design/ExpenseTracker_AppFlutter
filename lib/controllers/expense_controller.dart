@@ -3,12 +3,15 @@ import 'package:flutter/foundation.dart';
 
 import '../repositories/expense_repository.dart';
 import '../models/expense_model.dart';
+import '../models/monthly_summary_model.dart';
 
 class ExpenseController extends ChangeNotifier {
   final ExpenseRepository repository;
-  ExpenseController({
-    required this.repository,
-  });
+
+  ExpenseController(this.repository){
+    _initialize();
+  }
+
   final List<Expense> expenses = [];
   double monthlyIncome = 0;
   String searchText = "";
@@ -17,13 +20,19 @@ class ExpenseController extends ChangeNotifier {
   String selectedDate = "All";
   bool isLoading = false;
   String? errorMessage;
+  bool isSearching = false;
+  List<MonthlySummary> monthlySummaries = [];
 
   double get totalExpense {
-    return expenses.fold(
-      0,
-          (sum, expense) => sum + expense.amount,
+    final now = DateTime.now();
+    return expenses
+        .where((expense)=>
+        expense.date.year == now.year &&
+        expense.date.month == now.month)
+        .fold(0.0, (sum, expense) => sum + expense.amount,
     );
   }
+
 
   double get totalBalance {
     return monthlyIncome - totalExpense;
@@ -32,6 +41,21 @@ class ExpenseController extends ChangeNotifier {
   void setCategory(String category) {
     selectedCategory = category;
     notifyListeners();
+  }
+
+  List<Expense> get recentTransactions {
+    final result = List<Expense>.from(expenses);
+
+    result.sort((a, b) => b.date.compareTo(a.date));
+
+    return result;
+  }
+
+  Future<void> _initialize() async {
+    await loadExpenses();
+    await loadIncome();
+    await loadMonthlySummaries();
+
   }
 
  Future<void> loadExpenses() async{
@@ -127,14 +151,13 @@ class ExpenseController extends ChangeNotifier {
   List<Expense> get allFilteredExpenses {
     List<Expense> result = List.from(expenses);
 
-    // Category
     if (selectedCategory != "All") {
       result = result.where((expense) {
         return expense.category == selectedCategory;
       }).toList();
     }
 
-    // Date
+
     final now = DateTime.now();
 
     if (selectedDate == "Today") {
@@ -152,7 +175,7 @@ class ExpenseController extends ChangeNotifier {
       }).toList();
     }
 
-    // Sort
+
     if (selectedSort == "Newest") {
       result.sort((a, b) => b.date.compareTo(a.date));
     } else if (selectedSort == "Oldest") {
@@ -165,6 +188,8 @@ class ExpenseController extends ChangeNotifier {
 
     return result;
   }
+
+
   void setSearchText(String value) {
     searchText = value;
     notifyListeners();
@@ -181,4 +206,77 @@ class ExpenseController extends ChangeNotifier {
 
     notifyListeners();
   }
+
+  void startSearch(){
+    isSearching = true;
+    notifyListeners();
+  }
+  void closeSearch(){
+    isSearching = false;
+    searchText = "";
+    notifyListeners();
+  }
+
+
+
+  Future<void> resetAllData() async {
+    await repository.resetAllData();
+
+    expenses.clear();
+    monthlyIncome = 0;
+    categoryExpenses.clear();
+
+    notifyListeners();
+  }
+
+
+  Future<void> loadMonthlySummaries() async {
+    final now = DateTime.now();
+
+    final List<MonthlySummary> summaries = [];
+
+    for (int i = 0; i < 6; i++) {
+      final date = DateTime(
+        now.year,
+        now.month - i,
+        1,
+      );
+
+      final month = date.month;
+      final year = date.year;
+
+      final monthExpenses = expenses.where((expense){
+        return expense.date.year == year &&
+        expense.date.month == month;
+      }).toList();
+
+
+
+      final income =
+          await repository.getIncomeForMonth(month, year) ?? 0;
+
+      final expense = expenses
+          .where((expense) =>
+      expense.date.year == year &&
+          expense.date.month == month)
+          .fold(
+        0.0,
+            (sum, expense) => sum + expense.amount,
+      );
+
+      summaries.add(
+        MonthlySummary(
+          month: month,
+          year: year,
+          income: income,
+          totalExpense: expense,
+        ),
+      );
+    }
+
+    monthlySummaries = summaries;
+
+    notifyListeners();
+  }
+
 }

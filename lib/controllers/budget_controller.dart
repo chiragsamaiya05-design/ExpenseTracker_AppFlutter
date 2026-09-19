@@ -15,11 +15,13 @@ class BudgetController extends ChangeNotifier {
   bool get isLoading => _isLoading;
   Map<String, double> _categoryExpenses = {};
   Map<String, double> get categoryExpenses => _categoryExpenses;
+
   String get startDate {
     final now = DateTime.now();
 
     return '${now.year}-${now.month.toString().padLeft(2, '0')}-01';
   }
+
   String get endDate {
     final now = DateTime.now();
 
@@ -31,11 +33,14 @@ class BudgetController extends ChangeNotifier {
 
     return '${now.year}-${now.month.toString().padLeft(2, '0')}-$lastDay';
   }
+
   String get currentMonth {
     final now = DateTime.now();
 
     return '${now.year}-${now.month.toString().padLeft(2, '0')}';
   }
+
+
 
   Future<void> loadBudgets(String month) async {
     _isLoading = true;
@@ -111,6 +116,12 @@ class BudgetController extends ChangeNotifier {
     );
 
     _isLoading = false;
+    notifyListeners();
+  }
+  Future<void> clearLocalData() async {
+    budgets.clear();
+    categoryExpenses.clear();
+
     notifyListeners();
   }
 

@@ -16,43 +16,105 @@ class ExpenseListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      title: Text(
-        expense.title,
-        style: const TextStyle(
-          fontWeight: FontWeight.bold,
-        ),
+    return Card(
+      margin: const EdgeInsets.only(bottom: 10),
+      elevation: 1,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
       ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14,vertical: 12),
 
-      subtitle: Text(
-        "${expense.category} • "
-            "${expense.date.day}/"
-            "${expense.date.month}/"
-            "${expense.date.year}",
-      ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    expense.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
 
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            expense.amount.toString(),
-            style: const TextStyle(
-              fontSize: 20,
+                  const SizedBox(height: 5),
+
+                  Text(
+                    '${expense.category} • '
+                        '${expense.date.day}/'
+                        '${expense.date.month}/'
+                        '${expense.date.year}',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
 
-          IconButton(
-            icon: const Icon(Icons.edit),
-            onPressed: onEdit,
-          ),
+            const SizedBox(width: 10),
+            Row(
+              mainAxisSize: .min,
+              children: [
+                Text(
+                  expense.amount.toStringAsFixed(2),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(width: 2,),
 
-          const SizedBox(width: 2),
+                SizedBox(
+                  width: 28,
+                  height: 40,
+                  child: PopupMenuButton<String>(
+                    padding: EdgeInsets.zero,
 
-          IconButton(
-            icon: const Icon(Icons.delete),
-            onPressed: onDelete,
-          ),
-        ],
+                    icon: const Icon(
+                      Icons.more_vert,
+                      size: 22,
+                    ),
+                    onSelected: (value) {
+                      if (value == 'edit') {
+                        onEdit();
+                      } else if (value == 'delete') {
+                        onDelete();
+                      }
+                    },
+                    itemBuilder: (context) => const [
+                      PopupMenuItem(
+                        value: 'edit',
+                        child: Row(
+                          children: [
+                            Icon(Icons.edit),
+                            SizedBox(width: 10),
+                            Text('Edit'),
+                          ],
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            Icon(Icons.delete_outline),
+                            SizedBox(width: 10),
+                            Text('Delete'),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -29,17 +29,14 @@ class AllExpensesScreen extends StatelessWidget {
               sort,
               date,
             );
-
             Navigator.pop(bottomSheetContext);
           },
-
           onClear: () {
             controller.setFilters(
               "All",
               "Newest",
               "All",
             );
-
             Navigator.pop(bottomSheetContext);
           },
         );
@@ -76,7 +73,6 @@ class AllExpensesScreen extends StatelessWidget {
         child: CircularProgressIndicator(),
       );
     }
-
     if (controller.errorMessage != null) {
       return Center(
         child: Text(
@@ -87,7 +83,6 @@ class AllExpensesScreen extends StatelessWidget {
         ),
       );
     }
-
     if (controller.allFilteredExpenses.isEmpty) {
       return const Center(
         child: Text(
@@ -98,7 +93,6 @@ class AllExpensesScreen extends StatelessWidget {
         ),
       );
     }
-
     return ListView.builder(
       itemCount: controller.allFilteredExpenses.length,
       itemBuilder: (context, index) {
@@ -107,8 +101,7 @@ class AllExpensesScreen extends StatelessWidget {
 
         return ExpenseListItem(
           expense: expense,
-
-          onEdit: () async {
+          onEdit: () async { //declared in widgets
             final updatedExpense = await Navigator.push(
               context,
               MaterialPageRoute(
@@ -119,7 +112,6 @@ class AllExpensesScreen extends StatelessWidget {
                 },
               ),
             );
-
             if (updatedExpense != null) {
               await controller.updateExpense(
                 updatedExpense,
@@ -127,7 +119,7 @@ class AllExpensesScreen extends StatelessWidget {
             }
           },
 
-          onDelete: () async {
+          onDelete: () async {//declared in widgets
             final confirmed =
             await showConfirmationDialog(
               context,
@@ -135,7 +127,6 @@ class AllExpensesScreen extends StatelessWidget {
               message:
               "Are you sure you want to delete this expense?",
             );
-
             if (confirmed) {
               await controller.deleteExpense(
                 expense.id!,

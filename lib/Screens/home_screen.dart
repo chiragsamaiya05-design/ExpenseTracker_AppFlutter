@@ -18,61 +18,34 @@ import 'add_income_screen.dart';
 import 'package:expense_tracker/utils/confirmation_dailog.dart';
 
 import 'package:expense_tracker/controllers/expense_controller.dart';
+import 'package:expense_tracker/controllers/budget_controller.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+class HomeScreen extends StatelessWidget {
+   HomeScreen({super.key});
 
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
+   final TextEditingController searchController = TextEditingController();
 
-class _HomeScreenState extends State<HomeScreen>{
-
-
-  final TextEditingController searchController = TextEditingController();
-  bool isSearching = false;
-
-  @override
-  void initState() {
-    super.initState();
-    loadData();
-  }
-  Future<void> loadData() async {
-    final controller = context.read<ExpenseController>();
-
-    await controller.loadExpenses();
-    await controller.loadIncome();
-  }
-  @override
-  void dispose() {
-    searchController.dispose();
-    super.dispose();
-  }
   @override
   Widget build(BuildContext context) {
+    final controller = context.watch<ExpenseController>();
+    final recentExpenses = controller.displayExpenses.take(3).toList();
 
    return Scaffold(
      appBar:  HomeAppBar(
-     isSearching: isSearching,
+     isSearching: controller.isSearching,
      searchController: searchController,
 
      onSearchChanged: (value) {
-       context.read<ExpenseController>().setSearchText(value);
+       controller.setSearchText(value);
      },
 
      onSearch: () {
-       setState(() {
-         isSearching = true;
-       });
+       controller.startSearch();
      },
 
      onCloseSearch: () {
-       setState(() {
-         isSearching = false;
-
-         searchController.clear();
-       });
-       context.read<ExpenseController>().setSearchText("");
+       searchController.clear();
+       controller.closeSearch();
      },
 
      onSummary: () {
@@ -83,6 +56,26 @@ class _HomeScreenState extends State<HomeScreen>{
          ),
        );
      },
+       onReset: () async {
+         final confirmed = await showConfirmationDialog(
+           context,
+           title: 'Reset All Data',
+           message:
+           'Are you sure you want to delete all expenses, income and budgets?',
+         );
+
+         if (!confirmed) return;
+
+         final expenseController =
+         context.read<ExpenseController>();
+
+         final budgetController =
+         context.read<BudgetController>();
+
+         await expenseController.resetAllData();
+
+         await budgetController.loadBudgetData();
+       },
    ),
 
      body: Consumer<ExpenseController>(
@@ -166,11 +159,12 @@ class _HomeScreenState extends State<HomeScreen>{
                  ),
                  const SizedBox(height: 10,),
 
-                 Expanded(
+                 SizedBox(
+                   height: 250,
                    child: ListView.builder(
-                     itemCount: controller.displayExpenses.length,
+                     itemCount: recentExpenses.length,
                      itemBuilder: (context, index) {
-                       final expense = controller.displayExpenses[index];
+                       final expense = recentExpenses[index];
 
                        return ExpenseListItem(
                          expense: expense,
@@ -179,12 +173,12 @@ class _HomeScreenState extends State<HomeScreen>{
                            final Expense? updatedExpense = await Navigator.push(
                              context,
                              MaterialPageRoute(
-                               builder: (context) =>
-                                   EditExpenseScreen(
-                                     expense: expense,
-                                   ),
+                               builder: (context) => EditExpenseScreen(
+                                 expense: expense,
+                               ),
                              ),
                            );
+
                            if (updatedExpense != null) {
                              await controller.updateExpense(updatedExpense);
                            }

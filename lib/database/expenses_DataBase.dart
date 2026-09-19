@@ -267,4 +267,31 @@ class ExpensesDatabase {
 
     return Budget.fromMap(result.first);
   }
+
+  Future<void> resetAllData() async {
+    final db = await database;
+
+    await db.delete('expense');
+    await db.delete('monthly_income');
+    await db.delete('budgets');
+  }
+
+  Future<double?> getIncomeForMonth(
+      int month,
+      int year,
+      ) async {
+    final db = await database;
+
+    final result = await db.query(
+      'monthly_income',
+      where: 'month = ? AND year = ?',
+      whereArgs: [month, year],
+    );
+
+    if (result.isEmpty) {
+      return null;
+    }
+
+    return (result.first['income'] as num).toDouble();
+  }
 }

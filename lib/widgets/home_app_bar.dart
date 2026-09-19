@@ -8,6 +8,7 @@ class HomeAppBar extends StatelessWidget
   final VoidCallback onSearch;
   final VoidCallback onCloseSearch;
   final VoidCallback onSummary;
+  final VoidCallback onReset;
 
   const HomeAppBar({
     super.key,
@@ -17,6 +18,7 @@ class HomeAppBar extends StatelessWidget
     required this.onSearch,
     required this.onCloseSearch,
     required this.onSummary,
+    required this.onReset,
   });
 
   @override
@@ -69,6 +71,11 @@ class HomeAppBar extends StatelessWidget
           icon: const Icon(
             Icons.notifications_outlined,
           ),
+        ),
+        IconButton(
+          icon: const Icon(Icons.delete_forever),
+          onPressed: onReset,
+          tooltip: 'Reset all data',
         ),
 
         PopupMenuButton<String>(

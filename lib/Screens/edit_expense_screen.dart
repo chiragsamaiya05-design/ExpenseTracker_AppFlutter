@@ -54,166 +54,166 @@ class _EditExpenseScreenState extends State<EditExpenseScreen>{
     return Scaffold(
       appBar: AppBar(
         title: const Text("Edit Expense"),),
-      body: Form(
-  key: _formKey,
-  child: Padding(
-  padding: EdgeInsetsGeometry.all(16),
-  child: Column(
-  children: [
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(16),
+        child: Form(
+          key: _formKey,
+          child: Column(
+          children: [
 
-  const Text("Tilte"),
+          const Text("Tilte"),
 
-  const SizedBox(height: 8,),
+          const SizedBox(height: 8,),
 
-  TextFormField(
-  controller: titleController,
-  decoration: const InputDecoration(
-  hintText: "Enter expense tilte",
-  border: OutlineInputBorder(),
-  ),
-  validator: (value){
-  if (value== null || value.trim().isEmpty){
-  return "Please enter a title";
-  }
-  return null;
-  },
-  ),
-  const SizedBox(height: 20),
-    const Text(
-  "Amount",
-  style: TextStyle(
-  fontSize: 16,
-  fontWeight: FontWeight.bold,
-  ),
-  ),
-  const SizedBox(height: 8,),
+          TextFormField(
+          controller: titleController,
+          decoration: const InputDecoration(
+          hintText: "Enter expense tilte",
+          border: OutlineInputBorder(),
+          ),
+          validator: (value){
+          if (value== null || value.trim().isEmpty){
+          return "Please enter a title";
+          }
+          return null;
+          },
+          ),
+          const SizedBox(height: 20),
+            const Text(
+          "Amount",
+          style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          ),
+          ),
+          const SizedBox(height: 8,),
 
-  TextFormField(
-  controller: amountController,
-  keyboardType: TextInputType.number,
-  decoration: const InputDecoration(
-  hintText: "Enter amount",
-  border: OutlineInputBorder(),
-  ),
-  validator: (value) {
-  if (value == null || value.trim().isEmpty) {
-  return "Please enter an amount";
-  }
+          TextFormField(
+          controller: amountController,
+          keyboardType: TextInputType.number,
+          decoration: const InputDecoration(
+          hintText: "Enter amount",
+          border: OutlineInputBorder(),
+          ),
+          validator: (value) {
+          if (value == null || value.trim().isEmpty) {
+          return "Please enter an amount";
+          }
 
-  final amount = double.tryParse(value);
+          final amount = double.tryParse(value);
 
-  if (amount == null) {
-  return "Please enter a valid number";
-  }
+          if (amount == null) {
+          return "Please enter a valid number";
+          }
 
-  if (amount <= 0) {
-  return "Amount must be greater than 0";
-  }
+          if (amount <= 0) {
+          return "Amount must be greater than 0";
+          }
 
-  return null;
-  },
-  ),
+          return null;
+          },
+          ),
 
-  const SizedBox(height: 20),
-  const Text(
-  "Date",
-  style: TextStyle(
-  fontSize: 16,
-  fontWeight: FontWeight.bold,
-  ),
-  ),
+          const SizedBox(height: 20),
+          const Text(
+          "Date",
+          style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          ),
+          ),
 
-  const SizedBox(height: 8),
+          const SizedBox(height: 8),
 
-  ListTile(
-  shape: RoundedRectangleBorder(
-  borderRadius: BorderRadius.circular(5),
-  side: const BorderSide(),
-  ),
+          ListTile(
+          shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(5),
+          side: const BorderSide(),
+          ),
 
-  title: Text(
-  "${selectedDate.day}/"
-  "${selectedDate.month}/"
-  "${selectedDate.year}",
-  ),
+          title: Text(
+          "${selectedDate.day}/"
+          "${selectedDate.month}/"
+          "${selectedDate.year}",
+          ),
 
-  trailing: const Icon(Icons.calendar_month),
+          trailing: const Icon(Icons.calendar_month),
 
-  onTap: () async {
-  final DateTime? pickedDate =
-  await showDatePicker(
-  context: context,
-  initialDate: selectedDate,
-  firstDate: DateTime(2020),
-  lastDate: DateTime.now(),
-  );
+          onTap: () async {
+          final DateTime? pickedDate =
+          await showDatePicker(
+          context: context,
+          initialDate: selectedDate,
+          firstDate: DateTime(2020),
+          lastDate: DateTime.now(),
+          );
 
-  if (pickedDate != null) {
-  setState(() {
-  selectedDate = pickedDate;
-  });
-  }
-  },
-  ),
+          if (pickedDate != null) {
+          setState(() {
+          selectedDate = pickedDate;
+          });
+          }
+          },
+          ),
 
-  const SizedBox(height: 30),
+          const SizedBox(height: 30),
 
-  const Text(
-  "Category",
-  style: TextStyle(
-  fontSize: 16,
-  fontWeight: FontWeight.bold,
-  ),
-  ),
+          const Text(
+          "Category",
+          style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          ),
+          ),
 
 
-  const SizedBox(height: 8),
+          const SizedBox(height: 8),
 
-    DropdownButtonFormField<String>(
-      value: selectedCategory,
-      decoration: const InputDecoration(
-        labelText: "Category",
-        border: OutlineInputBorder(),
+            DropdownButtonFormField<String>(
+                  value: selectedCategory,
+                  decoration: const InputDecoration(
+          labelText: "Category",
+          border: OutlineInputBorder(),
+                  ),
+                  items: categories.map((category) {
+          return DropdownMenuItem(
+            value: category,
+            child: Text(category),
+          );
+                  }).toList(),
+                  onChanged: (value) {
+          setState(() {
+            selectedCategory = value!;
+          });
+                  },
+            ),
+          const SizedBox(height: 30,),
+
+          SizedBox(
+          width: double.infinity,
+
+          child: ElevatedButton(onPressed: () async {
+          if (!_formKey.currentState!.validate()){
+          return;
+          }
+          final String title = titleController.text.trim();
+          final  amount = double.parse(amountController.text);
+          final expense = Expense(
+          id: widget.expense.id,
+          title: title,
+          amount: amount,
+          category: selectedCategory,
+          date: selectedDate,
+          );
+          Navigator.pop(context,expense);
+          },
+          child: const Text("Edit Expense"),),
+          )
+
+          ],
+          ),
+          ),
       ),
-      items: categories.map((category) {
-        return DropdownMenuItem(
-          value: category,
-          child: Text(category),
-        );
-      }).toList(),
-      onChanged: (value) {
-        setState(() {
-          selectedCategory = value!;
-        });
-      },
-    ),
-  const SizedBox(height: 30,),
-
-  SizedBox(
-  width: double.infinity,
-
-  child: ElevatedButton(onPressed: () async {
-  if (!_formKey.currentState!.validate()){
-  return;
-  }
-  final String title = titleController.text.trim();
-  final  amount = double.parse(amountController.text);
-  final expense = Expense(
-  id: widget.expense!.id,
-  title: title,
-  amount: amount,
-  category: selectedCategory,
-  date: selectedDate,
-  );
-  Navigator.pop(context,expense);
-  },
-  child: const Text("Edit Expense"),),
-  )
-
-  ],
-  ),
-  ),
-  ),
   );
   }
 
