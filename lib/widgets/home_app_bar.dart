@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-class HomeAppBar extends StatelessWidget
+class HomeAppBar extends StatefulWidget
     implements PreferredSizeWidget {
   final bool isSearching;
-  final TextEditingController searchController;
-  final ValueChanged<String> onSearchChanged;
+
+  final Function(String) onSearchChanged;
   final VoidCallback onSearch;
   final VoidCallback onCloseSearch;
   final VoidCallback onSummary;
@@ -13,7 +13,6 @@ class HomeAppBar extends StatelessWidget
   const HomeAppBar({
     super.key,
     required this.isSearching,
-    required this.searchController,
     required this.onSearchChanged,
     required this.onSearch,
     required this.onCloseSearch,
@@ -22,87 +21,98 @@ class HomeAppBar extends StatelessWidget
   });
 
   @override
+  State<HomeAppBar> createState() => _HomeAppBarState();
+
+  @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+}
+
+class _HomeAppBarState extends State<HomeAppBar> {
+  late final TextEditingController _searchController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _searchController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: Colors.deepPurple,
+      backgroundColor: Colors.blueAccent,
       foregroundColor: Colors.white,
-
-      title: isSearching
+      title: widget.isSearching
           ? TextField(
-        controller: searchController,
+        controller: _searchController,
         autofocus: true,
-        style: const TextStyle(
-          color: Colors.white,
-        ),
         decoration: const InputDecoration(
-          hintText: "Search expense...",
-          hintStyle: TextStyle(
-            color: Colors.white70,
-          ),
+          hintText: 'Search expenses...',
           border: InputBorder.none,
         ),
-        onChanged: onSearchChanged,
+        onChanged: widget.onSearchChanged,
       )
-          : const Text(
-        "Expense Tracker",
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 25,
-        ),
+          : const Text('Expense Tracker',
+        style: TextStyle(color: Colors.white),
+
       ),
 
       actions: [
-        IconButton(
-          onPressed: onSearch,
-          icon: const Icon(Icons.search),
-        ),
-
-        if (isSearching)
+        if (widget.isSearching)
           IconButton(
-            onPressed: onCloseSearch,
             icon: const Icon(Icons.close),
+            onPressed: () {
+              _searchController.clear();
+              widget.onCloseSearch();
+            },
+          )
+        else ...[
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: widget.onSearch,
           ),
 
-        IconButton(
-          onPressed: null,
-          icon: const Icon(
-            Icons.notifications_outlined,
-          ),
-        ),
-        IconButton(
-          icon: const Icon(Icons.delete_forever),
-          onPressed: onReset,
-          tooltip: 'Reset all data',
-        ),
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'summary') {
+                widget.onSummary();
+              }
 
-        PopupMenuButton<String>(
-          onSelected: (value) {
-            if (value == "summary") {
-              onSummary();
-            }
-          },
-          itemBuilder: (context) => [
-            const PopupMenuItem(
-              value: "summary",
-              child: Text("Summary"),
-            ),
-            const PopupMenuItem(
-              value: "profile",
-              child: Text("Profile"),
-            ),
-            const PopupMenuItem(
-              value: "settings",
-              child: Text("Settings"),
-            ),
-            const PopupMenuItem(
-              value: "logout",
-              child: Text("Logout"),
-            ),
-          ],
-        ),
+              if (value == 'reset') {
+                widget.onReset();
+              }
+            },
+            itemBuilder: (context) => const [
+              PopupMenuItem(
+                value: 'summary',
+                child: Row(
+                  children: [
+                    Icon(Icons.bar_chart),
+                    SizedBox(width: 10),
+                    Text('Summary'),
+                  ],
+                ),
+              ),
+
+              PopupMenuItem(
+                value: 'reset',
+                child: Row(
+                  children: [
+                    Icon(Icons.delete_forever),
+                    SizedBox(width: 10),
+                    Text('Reset All Data'),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
       ],
     );
   }

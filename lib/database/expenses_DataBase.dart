@@ -17,7 +17,7 @@ class ExpensesDatabase {
         await getDatabasesPath(),
         'expenseDataBase.db',
       ),
-      version: 3,
+      version: 5,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE expense(
@@ -46,6 +46,28 @@ class ExpensesDatabase {
     UNIQUE(category, month)
 )
         ''');
+        await db.execute('''
+  CREATE TABLE monthly_finance(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    month INTEGER NOT NULL,
+    year INTEGER NOT NULL,
+
+    income REAL NOT NULL DEFAULT 0,
+    total_expense REAL NOT NULL DEFAULT 0,
+    remaining REAL NOT NULL DEFAULT 0,
+
+    carry_forward REAL NOT NULL DEFAULT 0,
+    debt REAL NOT NULL DEFAULT 0,
+
+    investment REAL NOT NULL DEFAULT 0,
+
+    carry_forward_approved INTEGER NOT NULL DEFAULT 0,
+    
+    decision TEXT,
+
+    UNIQUE(month, year)
+  )
+''');
       },
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 2) {
@@ -70,6 +92,37 @@ class ExpensesDatabase {
 )
           ''');
         }
+        if (oldVersion < 4) {
+          await db.execute('''
+    CREATE TABLE monthly_finance(
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      month INTEGER NOT NULL,
+      year INTEGER NOT NULL,
+
+      income REAL NOT NULL DEFAULT 0,
+      total_expense REAL NOT NULL DEFAULT 0,
+      remaining REAL NOT NULL DEFAULT 0,
+
+      carry_forward REAL NOT NULL DEFAULT 0,
+      debt REAL NOT NULL DEFAULT 0,
+
+      investment REAL NOT NULL DEFAULT 0,
+
+      carry_forward_approved INTEGER NOT NULL DEFAULT 0,
+
+      
+
+      UNIQUE(month, year)
+    )
+  ''');
+        }
+
+        if (oldVersion < 5) {
+          await db.execute(
+            'ALTER TABLE monthly_finance ADD COLUMN decision TEXT',
+          );
+        }
+
         },
 );
 
@@ -274,6 +327,7 @@ class ExpensesDatabase {
     await db.delete('expense');
     await db.delete('monthly_income');
     await db.delete('budgets');
+    await db.delete('monthly_finance');
   }
 
   Future<double?> getIncomeForMonth(
@@ -294,4 +348,59 @@ class ExpensesDatabase {
 
     return (result.first['income'] as num).toDouble();
   }
+
+  Future<void> saveMonthlyFinance({required int month,
+    required int year,
+    required double income,
+    required double totalExpense,
+    required double remaining,
+    required double carryForward,
+    required double debt,
+    required double investment,
+    required bool carryForwardApproved,
+    String? decision,
+  }) async {
+    final db = await database;
+
+    await db.insert(
+      'monthly_finance',
+      {
+        'month': month,
+        'year': year,
+        'income': income,
+        'total_expense': totalExpense,
+        'remaining': remaining,
+        'carry_forward': carryForward,
+        'debt': debt,
+        'investment': investment,
+        'carry_forward_approved':
+        carryForwardApproved ? 1 : 0,
+        'decision': decision,
+
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<Map<String, dynamic>?> getMonthlyFinance(
+      int month,
+      int year,
+      ) async {
+    final db = await database;
+
+    final result = await db.query(
+      'monthly_finance',
+      where: 'month = ? AND year = ?',
+      whereArgs: [month, year],
+      limit: 1,
+    );
+
+    if (result.isEmpty) {
+      return null;
+    }
+
+    return result.first;
+  }
+
+
 }
