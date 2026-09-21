@@ -36,14 +36,13 @@ class ExpenseRepository {
   Future<Map<String, double>> getCategoryExpenses() async {
     return await database.getCategoryWiseExpense();
   }
+
+
   Future<void> resetAllData() async {
     await database.resetAllData();
   }
 
-  Future<double?> getIncomeForMonth(
-      int month,
-      int year,
-      ) {
+  Future<double?> getIncomeForMonth(int month, int year,) {
     return database.getIncomeForMonth(month, year);
   }
 
