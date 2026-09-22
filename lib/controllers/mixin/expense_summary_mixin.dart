@@ -55,6 +55,11 @@ mixin ExpenseSummaryMixin on ChangeNotifier{
             (sum, expense) => sum + expense.amount,
       );
 
+      // Only add month if it has income or expense
+      if (income == 0 && expense == 0) {
+        continue;
+      }
+
       summaries.add(
         MonthlySummary(
           month: month,

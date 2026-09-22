@@ -30,8 +30,27 @@ class MonthlySummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool hasRemaining = summary.remaining > 0;
+    final bool hasExtraExpense = summary.extraExpense > 0;
+
+    final Color cardColor = hasRemaining
+        ? const Color(0xFFE3F5E9)
+        : hasExtraExpense
+        ? const Color(0xFFFFE5E5)
+        : Colors.white;
+
+    final Color accentColor = hasRemaining
+        ? const Color(0xFF3F8F5B)
+        : hasExtraExpense
+        ? const Color(0xFFC65F73)
+        : Colors.grey;
+
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
+      color: cardColor,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -40,7 +59,7 @@ class MonthlySummaryCard extends StatelessWidget {
             Text(
               '$monthName ${summary.year}',
               style: const TextStyle(
-                fontSize: 20,
+                fontSize: 15,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -60,11 +79,17 @@ class MonthlySummaryCard extends StatelessWidget {
             _row(
               'Remaining',
               summary.remaining,
+              color: hasRemaining
+                  ? accentColor
+                  : null,
             ),
 
             _row(
               'Extra Expense',
               summary.extraExpense,
+              color: hasExtraExpense
+                  ? accentColor
+                  : null,
             ),
           ],
         ),
@@ -72,19 +97,27 @@ class MonthlySummaryCard extends StatelessWidget {
     );
   }
 
-  Widget _row(String title, double amount) {
+  Widget _row(String title, double amount,{Color? color}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(title),
+          Text(
+              title,
+              style: const TextStyle(
+                fontSize: 11,),
+          ),
           Text(
             '₹${amount.toStringAsFixed(2)}',
-            style: const TextStyle(
-              fontWeight: FontWeight.w600,
+            style:  TextStyle(
+              fontSize: 11,
+              fontWeight: color != null
+              ?FontWeight.w600 :.normal,
+              color: color,
             ),
           ),
+
         ],
       ),
     );

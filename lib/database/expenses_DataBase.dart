@@ -402,5 +402,59 @@ class ExpensesDatabase {
     return result.first;
   }
 
+  Future<Map<String, double>> getCategoryWiseExpenseForMonth({
+    required int month,
+    required int year,
+  }) async {
+    final db = await database;
 
+    final result = await db.rawQuery(
+      '''
+    SELECT category, SUM(amount) AS total
+    FROM expense
+    WHERE strftime('%m', date) = ?
+      AND strftime('%Y', date) = ?
+    GROUP BY category
+    ''',
+      [
+        month.toString().padLeft(2, '0'),
+        year.toString(),
+      ],
+    );
+
+    return {
+      for (final row in result)
+        row['category'] as String:
+        (row['total'] as num).toDouble(),
+    };
+  }
+  Future<Map<int, double>> getDailyExpenseForMonth({
+    required int month,
+    required int year,
+  }) async {
+    final db = await database;
+
+    final result = await db.rawQuery(
+      '''
+    SELECT 
+      CAST(strftime('%d', date) AS INTEGER) AS day,
+      SUM(amount) AS total
+    FROM expense
+    WHERE strftime('%m', date) = ?
+      AND strftime('%Y', date) = ?
+    GROUP BY strftime('%d', date)
+    ORDER BY day
+    ''',
+      [
+        month.toString().padLeft(2, '0'),
+        year.toString(),
+      ],
+    );
+
+    return {
+      for (final row in result)
+        row['day'] as int:
+        (row['total'] as num).toDouble(),
+    };
+  }
 }

@@ -9,6 +9,7 @@ class HomeAppBar extends StatefulWidget
   final VoidCallback onCloseSearch;
   final VoidCallback onSummary;
   final VoidCallback onReset;
+  final VoidCallback onCharts;
 
   const HomeAppBar({
     super.key,
@@ -18,6 +19,7 @@ class HomeAppBar extends StatefulWidget
     required this.onCloseSearch,
     required this.onSummary,
     required this.onReset,
+    required this.onCharts,
   });
 
   @override
@@ -46,7 +48,7 @@ class _HomeAppBarState extends State<HomeAppBar> {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: Colors.blueAccent,
+      backgroundColor: const Color(0xFF4F46A5),
       foregroundColor: Colors.white,
       title: widget.isSearching
           ? TextField(
@@ -87,6 +89,9 @@ class _HomeAppBarState extends State<HomeAppBar> {
               if (value == 'reset') {
                 widget.onReset();
               }
+              if (value =='charts'){
+                widget.onCharts();
+              }
             },
             itemBuilder: (context) => const [
               PopupMenuItem(
@@ -107,6 +112,17 @@ class _HomeAppBarState extends State<HomeAppBar> {
                     Icon(Icons.delete_forever),
                     SizedBox(width: 10),
                     Text('Reset All Data'),
+                  ],
+                ),
+              ),
+
+               PopupMenuItem<String>(
+                value: 'charts',
+                child: Row(
+                  children: [
+                    Icon(Icons.bar_chart),
+                    SizedBox(width: 10),
+                    Text('Charts'),
                   ],
                 ),
               ),

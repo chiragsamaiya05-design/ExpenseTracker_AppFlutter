@@ -8,6 +8,7 @@ import 'edit_expense_screen.dart';
 import 'summary_screen.dart';
 import 'all_expenses_screen.dart';
 import 'budget_screen.dart';
+import 'charts_screen.dart';
 
 import 'package:expense_tracker/widgets/balance_card.dart';
 import 'package:expense_tracker/widgets/income_expense_card.dart';
@@ -69,71 +70,85 @@ class HomeScreen extends StatelessWidget {
            await expenseController.resetAllData();
            await budgetController.loadBudgetData();
          },
+         onCharts: () async{
+           Navigator.push(
+             context,
+             MaterialPageRoute(
+               builder: (context) => const ChartsScreen(),
+             ),
+           );
+         },
      ),
      
        body: Consumer<ExpenseController>(
          builder: (context,controller,chlid) {
            return Padding(
-             padding: EdgeInsetsGeometry.all(16),
+             padding: EdgeInsetsGeometry.fromLTRB(16,12,16,0),
              child: Column(
                  crossAxisAlignment: .start,
                  children: <Widget>[
                    BalanceCard(
                      balance: controller.totalBalance,
                    ),
-                   const SizedBox(height: 10,),
+                   const SizedBox(height: 14),
      
                    Row(
                      children: [
-                       IncomeExpenseCard(
-                         title: "Income",
-                         amount: controller.monthlyIncome,
-                         onTap: () async {
-                           await showModalBottomSheet(
-                             context: context,
-                             isScrollControlled: true,
-                             builder: (context) {
-                               return AddIncomeScreen(
-                                 controller: controller,
-                               );
-                             },
-                           );
-                         },
+                       Expanded(
+                         child: IncomeExpenseCard(
+                           title: "Income",
+                           amount: controller.monthlyIncome,
+                           color: const Color(0xFFD9F7E5),
+                           onTap: () async {
+                             await showModalBottomSheet(
+                               context: context,
+                               isScrollControlled: true,
+                               builder: (context) {
+                                 return AddIncomeScreen(
+                                   controller: controller,
+                                 );
+                               },
+                             );
+                           },
+                         ),
                        ),
      
-                       const SizedBox(width: 10),
+                       const SizedBox(width: 16),
      
-                       IncomeExpenseCard(
-                         title: "Expense",
-                         amount: controller.totalExpense,
+                       Expanded(
+                         child: IncomeExpenseCard(
+                           title: "Expense",
+                           amount: controller.totalExpense,
+                           color:  const Color(0xFFFFE0DE),
+                         ),
                        ),
                      ],
                    ),
      
                    const SizedBox(height: 16),
-     
-                   ElevatedButton.icon(
-                     onPressed: () {
-                       Navigator.push(
-                         context,
-                         MaterialPageRoute(
-                           builder: (context) => const BudgetScreen(),
-                         ),
-                       );
-                     },
-                     icon: const Icon(Icons.account_balance_wallet),
-                     label: const Text('Manage Budget'),
-                   ),
-                   const SizedBox(height: 10,),
-
                    Row(
                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                      children: [
-                       const Text(
-                         "Recent Transactions",
-                         style: TextStyle(
-                           fontSize: 20,
-                           fontWeight: FontWeight.bold,
+                       Container(
+                         padding: const EdgeInsets.all(8),
+                         decoration: BoxDecoration(
+                           color: const Color(0xFFE7E9FF),
+                           borderRadius: BorderRadius.circular(10),
+                         ),
+                         child: const Icon(
+                           Icons.receipt_long_rounded,
+                           color: Color(0xFF5B5FC7),
+                           size: 20,
+                         ),
+                       ),
+                       const SizedBox(width: 10),
+                       const Expanded(
+                         child:  Text(
+                           "Recent Transactions",
+                           style: TextStyle(
+                             fontSize: 12,
+                             fontWeight: FontWeight.bold,
+                           ),
                          ),
                        ),
                        TextButton(
@@ -145,16 +160,29 @@ class HomeScreen extends StatelessWidget {
                              ),
                            );
                          },
-                         child: const Text("View All"),
+                         child: const Text("View All",
+                           style: TextStyle(
+                             fontSize: 10,
+                             fontWeight: .bold
+                           ),
+                         ),
                        ),
                      ],
                    ),
      
-                   const SizedBox(height: 10,),
+                   const SizedBox(height: 8),
      
-                   SizedBox(
-                     height: 250,
-                     child: ListView.builder(
+                   Expanded(
+                     child: recentExpenses.isEmpty
+                         ? const Center(
+                       child: Text(
+                         "No recent transactions",
+                         style: TextStyle(
+                           color: Colors.grey,
+                         ),
+                       ),
+                     )
+                         : ListView.builder(
                        itemCount: recentExpenses.length,
                        itemBuilder: (context, index) {
                          final expense = recentExpenses[index];
@@ -199,6 +227,10 @@ class HomeScreen extends StatelessWidget {
        ),
      
        floatingActionButton: FloatingActionButton(
+         backgroundColor: const Color(0xFF6750A4),
+         foregroundColor: Colors.white,
+         shape: const CircleBorder(),
+         elevation: 6,
          onPressed: () async{
            final Expense? newExpense = await Navigator.push(
              context,

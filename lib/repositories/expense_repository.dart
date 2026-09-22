@@ -69,5 +69,22 @@ class ExpenseRepository {
     return MonthlyFinance.fromMap(data);
   }
 
-
+  Future<Map<String, double>> getCategoryWiseExpenseForMonth({
+    required int month,
+    required int year,
+  }) async {
+    return await database.getCategoryWiseExpenseForMonth(
+      month: month,
+      year: year,
+    );
+  }
+  Future<Map<int, double>> getDailyExpenseForMonth({
+    required int month,
+    required int year,
+  }) async {
+    return await database.getDailyExpenseForMonth(
+      month: month,
+      year: year,
+    );
+  }
 }

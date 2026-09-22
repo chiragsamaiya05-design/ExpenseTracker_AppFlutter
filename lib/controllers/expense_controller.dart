@@ -34,7 +34,7 @@ with ExpenseCrudMixin,
   MonthlyFinance? currentMonthlyFinance;
 
   final List<Expense> expenses = [];
-
+  Map<int, double> dailyExpenses = {};
 
 
 
@@ -100,9 +100,17 @@ with ExpenseCrudMixin,
     notifyListeners();
   }
 
+  Future<void> loadChartCategoryExpenses({
+    required int month,
+    required int year,
+  }) async {
+    categoryExpenses = await repository.getCategoryWiseExpenseForMonth(
+      month: month,
+      year: year,
+    );
 
-
-
+    notifyListeners();
+  }
 
   Future<void> loadMonthlyFinance() async {
     final finance = await repository.getMonthlyFinance(
@@ -125,10 +133,17 @@ with ExpenseCrudMixin,
     notifyListeners();
   }
 
+  Future<void> loadDailyChartExpenses({
+    required int month,
+    required int year,
+  }) async {
+    dailyExpenses = await repository.getDailyExpenseForMonth(
+      month: month,
+      year: year,
+    );
 
-
-
-
+    notifyListeners();
+  }
 
 
   Future<void> checkMonthlySettlement() async {
@@ -187,6 +202,19 @@ with ExpenseCrudMixin,
     settlementRequired = false;
 
     notifyListeners();
+  }
+  double getSpentForCategory(String category) {
+    final now = DateTime.now();
+
+    return expenses
+        .where((expense) =>
+    expense.category == category &&
+        expense.date.year == now.year &&
+        expense.date.month == now.month)
+        .fold(
+      0.0,
+          (sum, expense) => sum + expense.amount,
+    );
   }
 
 }
