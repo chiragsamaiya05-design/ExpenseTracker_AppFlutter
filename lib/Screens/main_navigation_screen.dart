@@ -25,7 +25,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     const BudgetScreen(),
   ];
 
-  // When user taps NavigationBar
+
   void onTabChanged(int index) {
     setState(() {
       currentIndex = index;
@@ -33,12 +33,12 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
     pageController.animateToPage(
       index,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
+      duration: const Duration(milliseconds: 3500),
+      curve: Curves.easeOutCubic,
     );
   }
 
-  // When user swipes PageView
+
   void onPageChanged(int index) {
     setState(() {
       currentIndex = index;
@@ -51,6 +51,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       body: PageView(
         controller: pageController,
         onPageChanged: onPageChanged,
+        physics: const SmallSwipePhysics(),
         children: screens,
       ),
 
@@ -126,4 +127,18 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     pageController.dispose();
     super.dispose();
   }
+}
+class SmallSwipePhysics extends PageScrollPhysics {
+  const SmallSwipePhysics({super.parent});
+
+  @override
+  SmallSwipePhysics applyTo(ScrollPhysics? ancestor) {
+    return SmallSwipePhysics(parent: buildParent(ancestor));
+  }
+
+  @override
+  double get minFlingDistance => 20.0;
+
+  @override
+  double get minFlingVelocity => 300.0;
 }

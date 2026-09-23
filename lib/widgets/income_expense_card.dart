@@ -74,7 +74,7 @@ class IncomeExpenseCard extends StatelessWidget {
               Text(
                 '₹${amount.toStringAsFixed(2)}',
                 style: const TextStyle(
-                  fontSize: 10,
+                  fontSize: 12,
                   fontWeight: FontWeight.bold,
                 ),
               ),

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../constants/add_color.dart';
 import '../controllers/budget_controller.dart';
 import '../controllers/expense_controller.dart';
+import '../widgets/app_bar_widget.dart';
 import 'add_budget_screen.dart';
 import '../models/budget_model.dart';
 import 'edit_budget_screen.dart';
@@ -48,8 +49,8 @@ class BudgetScreen extends StatelessWidget {
     context.watch<ExpenseController>();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Budget"),
+      appBar: const AppBarWidget(
+        title: 'Budget',
       ),
 
       body: ListView(
@@ -57,19 +58,9 @@ class BudgetScreen extends StatelessWidget {
 
         children: [
           const Text(
-            "Manage your budgets",
-            style: TextStyle(
-              fontSize: 14,
-              color: AppColors.textSecondary,
-            ),
-          ),
-
-          const SizedBox(height: 20),
-
-          const Text(
             "Category Budgets",
             style: TextStyle(
-              fontSize: 20,
+              fontSize: 16,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -110,6 +101,12 @@ class BudgetScreen extends StatelessWidget {
               builder: (context) => const AddBudgetScreen(),
             ),
           );
+
+          if (!context.mounted) return;
+
+          await context
+              .read<BudgetController>()
+              .loadBudgetData();
         },
 
         child: const Icon(Icons.add),
@@ -193,6 +190,12 @@ class BudgetScreen extends StatelessWidget {
                       ),
                     ),
                   );
+
+                  if (!context.mounted) return;
+
+                  await context
+                      .read<BudgetController>()
+                      .loadBudgetData();
                 },
               ),
             ],

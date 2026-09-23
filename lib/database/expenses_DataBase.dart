@@ -457,4 +457,5 @@ class ExpensesDatabase {
         (row['total'] as num).toDouble(),
     };
   }
+
 }

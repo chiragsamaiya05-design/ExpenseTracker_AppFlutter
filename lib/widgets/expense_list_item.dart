@@ -83,6 +83,21 @@ class ExpenseListItem extends StatelessWidget {
 
         child: Row(
           children: [
+            Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                color: categoryColor.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                _getCategoryIcon(),
+                color: categoryColor,
+                size: 22,
+              ),
+            ),
+
+            const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment:

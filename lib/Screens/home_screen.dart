@@ -5,10 +5,9 @@ import '../models/expense_model.dart';
 
 import 'add_expense_screen.dart';
 import 'edit_expense_screen.dart';
-import 'summary_screen.dart';
+
 import 'all_expenses_screen.dart';
-import 'budget_screen.dart';
-import 'charts_screen.dart';
+
 
 import 'package:expense_tracker/widgets/balance_card.dart';
 import 'package:expense_tracker/widgets/income_expense_card.dart';
@@ -19,8 +18,6 @@ import 'add_income_screen.dart';
 import 'package:expense_tracker/utils/confirmation_dailog.dart';
 
 import 'package:expense_tracker/controllers/expense_controller.dart';
-import 'package:expense_tracker/controllers/budget_controller.dart';
-
 import '../widgets/monthly_settlement_listener.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -47,37 +44,7 @@ class HomeScreen extends StatelessWidget {
      
          controller.closeSearch();
          },
-         onSummary: () {
-         Navigator.push(
-           context,
-           MaterialPageRoute(
-             builder: (context) => const SummaryScreen(),
-           ),
-         );
-         },
-         onReset: () async {
-           final confirmed = await showConfirmationDialog(
-             context,
-             title: 'Reset All Data',
-             message:
-             'Are you sure you want to delete all expenses, income and budgets?',
-           );
-           if (!confirmed) return;
-     
-           final expenseController = context.read<ExpenseController>();
-           final budgetController = context.read<BudgetController>();
-     
-           await expenseController.resetAllData();
-           await budgetController.loadBudgetData();
-         },
-         onCharts: () async{
-           Navigator.push(
-             context,
-             MaterialPageRoute(
-               builder: (context) => const ChartsScreen(),
-             ),
-           );
-         },
+
      ),
      
        body: Consumer<ExpenseController>(

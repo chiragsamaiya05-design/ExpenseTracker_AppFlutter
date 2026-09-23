@@ -8,7 +8,10 @@ class BudgetController extends ChangeNotifier {
 
   BudgetController({
     required this.repository,
-});
+})
+  {
+    loadBudgetData();
+}
   List<Budget> _budgets = [];
   List<Budget> get budgets => _budgets;
   bool _isLoading = false;
@@ -48,6 +51,16 @@ class BudgetController extends ChangeNotifier {
 
     _budgets = await repository.getBudget(month);
 
+    for (final budget in _budgets) {
+      debugPrint(
+        'DATABASE BUDGET -> '
+            'ID: ${budget.id}, '
+            'Category: ${budget.category}, '
+            'Amount: ${budget.amount}, '
+            'Month: ${budget.month}',
+      );
+    }
+
     _isLoading = false;
     notifyListeners();
   }
@@ -76,7 +89,11 @@ class BudgetController extends ChangeNotifier {
   }
 
   Future<void> updateBudget(Budget budget) async {
-    await repository.updateBudget(budget);
+
+
+    final result = await repository.updateBudget(budget);
+
+
 
     await loadBudgets(budget.month);
   }

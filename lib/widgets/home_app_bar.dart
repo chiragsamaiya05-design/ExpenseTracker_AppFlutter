@@ -7,9 +7,7 @@ class HomeAppBar extends StatefulWidget
   final Function(String) onSearchChanged;
   final VoidCallback onSearch;
   final VoidCallback onCloseSearch;
-  final VoidCallback onSummary;
-  final VoidCallback onReset;
-  final VoidCallback onCharts;
+
 
   const HomeAppBar({
     super.key,
@@ -17,9 +15,7 @@ class HomeAppBar extends StatefulWidget
     required this.onSearchChanged,
     required this.onSearch,
     required this.onCloseSearch,
-    required this.onSummary,
-    required this.onReset,
-    required this.onCharts,
+
   });
 
   @override
@@ -61,7 +57,7 @@ class _HomeAppBarState extends State<HomeAppBar> {
         onChanged: widget.onSearchChanged,
       )
           : const Text('Expense Tracker',
-        style: TextStyle(color: Colors.white),
+        style: TextStyle(color: Colors.white,fontSize: 16),
 
       ),
 
@@ -80,54 +76,7 @@ class _HomeAppBarState extends State<HomeAppBar> {
             onPressed: widget.onSearch,
           ),
 
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              if (value == 'summary') {
-                widget.onSummary();
-              }
 
-              if (value == 'reset') {
-                widget.onReset();
-              }
-              if (value =='charts'){
-                widget.onCharts();
-              }
-            },
-            itemBuilder: (context) => const [
-              PopupMenuItem(
-                value: 'summary',
-                child: Row(
-                  children: [
-                    Icon(Icons.bar_chart),
-                    SizedBox(width: 10),
-                    Text('Summary'),
-                  ],
-                ),
-              ),
-
-              PopupMenuItem(
-                value: 'reset',
-                child: Row(
-                  children: [
-                    Icon(Icons.delete_forever),
-                    SizedBox(width: 10),
-                    Text('Reset All Data'),
-                  ],
-                ),
-              ),
-
-               PopupMenuItem<String>(
-                value: 'charts',
-                child: Row(
-                  children: [
-                    Icon(Icons.bar_chart),
-                    SizedBox(width: 10),
-                    Text('Charts'),
-                  ],
-                ),
-              ),
-            ],
-          ),
         ],
       ],
     );

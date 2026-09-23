@@ -112,7 +112,7 @@ class _ChartsScreenState extends State<ChartsScreen> {
               Text(
                 '${_monthName(selectedMonth.month)} ${selectedMonth.year}',
                 style: const TextStyle(
-                  fontSize: 18,
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -133,7 +133,7 @@ class _ChartsScreenState extends State<ChartsScreen> {
           const Text(
             'Expense by Category',
             style: TextStyle(
-              fontSize: 20,
+              fontSize: 14,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -155,7 +155,7 @@ class _ChartsScreenState extends State<ChartsScreen> {
           const Text(
             'Daily Expenses',
             style: TextStyle(
-              fontSize: 20,
+              fontSize: 14,
               fontWeight: FontWeight.bold,
             ),
           ),

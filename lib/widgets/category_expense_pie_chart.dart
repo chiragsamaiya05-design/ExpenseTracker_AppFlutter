@@ -90,12 +90,17 @@ class CategoryExpensePieChart extends StatelessWidget {
       children: [
         SizedBox(
           height: 300,
-          child: PieChart(
-            PieChartData(
-              sections: sections,
-              centerSpaceRadius: 45,
-              sectionsSpace: 2,
+          child: Stack(
+            alignment: .center,
+            children: [
+              PieChart(
+              PieChartData(
+                sections: sections,
+                centerSpaceRadius: 45,
+                sectionsSpace: 2,
+              ),
             ),
+            ]
           ),
         ),
 

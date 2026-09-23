@@ -20,7 +20,7 @@ class AppBarWidget extends StatelessWidget
       title: Text(
         title,
         style: const TextStyle(
-          fontSize: 20,
+          fontSize: 16,
           color: Colors.white,
         ),
       ),
