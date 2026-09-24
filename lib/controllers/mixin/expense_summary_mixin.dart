@@ -3,9 +3,10 @@ import 'package:flutter/cupertino.dart';
 import '../../models/expense_model.dart';
 import '../../models/monthly_summary_model.dart';
 import '../../repositories/expense_repository.dart';
+import '../../repositories/income_repository.dart';
 
 mixin ExpenseSummaryMixin on ChangeNotifier{
-  late  ExpenseRepository repository;
+  late  IncomeRepository incomeRepository;
   final List<Expense> expenses = [];
   double monthlyIncome = 0;
   List<MonthlySummary> monthlySummaries = [];
@@ -42,7 +43,7 @@ mixin ExpenseSummaryMixin on ChangeNotifier{
       final year = date.year;
 
       final income =
-          await repository.getIncomeForMonth(month, year) ?? 0;
+          await incomeRepository.getIncomeForMonth(month, year) ?? 0;
 
       final expense = expenses
           .where(

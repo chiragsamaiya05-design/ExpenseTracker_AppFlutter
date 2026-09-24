@@ -68,18 +68,32 @@ class _ChartsScreenState extends State<ChartsScreen> {
 
     _loadChartData();
   }
+  bool _isLoading = false;
   Future<void> _loadChartData() async {
+    setState(() {
+      _isLoading = true;
+    });
+
     final controller = context.read<ExpenseController>();
 
-    await controller.loadChartCategoryExpenses(
-      month: selectedMonth.month,
-      year: selectedMonth.year,
-    );
-
-    await controller.loadDailyChartExpenses(
-      month: selectedMonth.month,
-      year: selectedMonth.year,
-    );
+    try {
+      await Future.wait([
+        controller.loadChartCategoryExpenses(
+          month: selectedMonth.month,
+          year: selectedMonth.year,
+        ),
+        controller.loadDailyChartExpenses(
+          month: selectedMonth.month,
+          year: selectedMonth.year,
+        ),
+      ]);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
 

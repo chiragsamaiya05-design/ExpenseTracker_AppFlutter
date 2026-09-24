@@ -1,15 +1,17 @@
+import 'package:expense_tracker/repositories/finance_repository.dart';
 import 'package:flutter/cupertino.dart';
 
-import '../../models/expense_model.dart';
+
 import '../../repositories/expense_repository.dart';
+import '../../repositories/income_repository.dart';
 
 mixin ExpenseIncomeMixin on ChangeNotifier{
-  late  ExpenseRepository repository;
+  late  IncomeRepository incomeRepository;
 
   double monthlyIncome = 0;
 
   Future<void> loadIncome() async {
-    final income = await repository.getMonthlyIncome();
+    final income = await incomeRepository.getMonthlyIncome();
 
     monthlyIncome = income ?? 0;
 
@@ -17,7 +19,7 @@ mixin ExpenseIncomeMixin on ChangeNotifier{
   }
 
   Future<void> saveIncome(double income) async {
-    await repository.saveMonthlyIncome(income);
+    await incomeRepository.saveMonthlyIncome(income);
 
     monthlyIncome = income;
 

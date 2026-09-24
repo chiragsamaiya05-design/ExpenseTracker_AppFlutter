@@ -51,7 +51,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       body: PageView(
         controller: pageController,
         onPageChanged: onPageChanged,
-        physics: const SmallSwipePhysics(),
+        physics: const PageScrollPhysics(),
         children: screens,
       ),
 

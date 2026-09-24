@@ -25,48 +25,8 @@ class ExpenseRepository {
     return await database.deleteExpense(id);
   }
 
-  Future<void> saveMonthlyIncome(double income) async {
-    await database.saveMonthlyIncome(income);
-  }
-
-  Future<double?> getMonthlyIncome() async {
-    return await database.getMonthlyIncome();
-  }
-
   Future<Map<String, double>> getCategoryExpenses() async {
     return await database.getCategoryWiseExpense();
-  }
-
-
-  Future<void> resetAllData() async {
-    await database.resetAllData();
-  }
-
-  Future<double?> getIncomeForMonth(int month, int year,) {
-    return database.getIncomeForMonth(month, year);
-  }
-
-  Future<void> saveMonthlyFinance(MonthlyFinance finance) async{
-    await database.saveMonthlyFinance(month: finance.month,
-        year: finance.year,
-        income: finance.income,
-        totalExpense: finance.totalExpense,
-        remaining: finance.remaining,
-        carryForward: finance.carryForward,
-        debt: finance.debt,
-        investment: finance.investment,
-        carryForwardApproved: finance.carryForwardApproved,
-
-    );
-  }
-
-  Future<MonthlyFinance?>getMonthlyFinance(int month, int year,) async{
-    final data = await database.getMonthlyFinance(month, year);
-
-    if(data == null){
-      return null;
-    }
-    return MonthlyFinance.fromMap(data);
   }
 
   Future<Map<String, double>> getCategoryWiseExpenseForMonth({

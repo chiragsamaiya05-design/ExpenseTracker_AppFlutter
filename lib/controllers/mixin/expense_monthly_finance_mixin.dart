@@ -1,9 +1,10 @@
 import 'package:flutter/cupertino.dart';
 
 import 'package:expense_tracker/repositories/expense_repository.dart';
+import '../../repositories/finance_repository.dart';
 
 mixin ExpenseMonthlyFinanceMixin on ChangeNotifier{
-  late ExpenseRepository repository;
+  late FinanceRepository financeRepository;
 
   double pendingSettlementAmount = 0;
   bool pendingSettlementIsDebt = false;
@@ -20,7 +21,7 @@ mixin ExpenseMonthlyFinanceMixin on ChangeNotifier{
     );
 
     final previousFinance =
-    await repository.getMonthlyFinance(
+    await financeRepository.getMonthlyFinance(
       previousMonth.month,
       previousMonth.year,
     );

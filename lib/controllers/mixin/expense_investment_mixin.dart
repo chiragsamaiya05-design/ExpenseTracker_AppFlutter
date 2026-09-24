@@ -2,9 +2,10 @@ import 'package:expense_tracker/repositories/expense_repository.dart';
 import 'package:flutter/cupertino.dart';
 
 import '../../models/monthly_finance_model.dart';
+import '../../repositories/finance_repository.dart';
 
 mixin ExpenseInvestmentMixin on ChangeNotifier{
-  late ExpenseRepository repository;
+  late FinanceRepository financeRepository;
 
   MonthlyFinance? currentMonthlyFinance;
 
@@ -28,7 +29,7 @@ mixin ExpenseInvestmentMixin on ChangeNotifier{
     );
 
     final previousFinance =
-    await repository.getMonthlyFinance(
+    await financeRepository.getMonthlyFinance(
       previousMonth.month,
       previousMonth.year,
     );
@@ -53,7 +54,7 @@ mixin ExpenseInvestmentMixin on ChangeNotifier{
       decision: 'invest',
     );
 
-    await repository.saveMonthlyFinance(finance);
+    await financeRepository.saveMonthlyFinance(finance);
 
     carryForward = 0;
     debt = 0;

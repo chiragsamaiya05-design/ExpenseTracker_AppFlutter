@@ -1,3 +1,4 @@
+import 'package:expense_tracker/repositories/app_repository.dart';
 import 'package:expense_tracker/repositories/expense_repository.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -6,7 +7,7 @@ import '../../models/monthly_finance_model.dart';
 import '../../models/monthly_summary_model.dart';
 
 mixin ResetMixin on ChangeNotifier{
-  late ExpenseRepository repository;
+  late AppRepository appRepository;
 
   MonthlyFinance? currentMonthlyFinance;
 
@@ -28,7 +29,7 @@ mixin ResetMixin on ChangeNotifier{
   Map<String, double> categoryExpenses = {};
 
   Future<void> resetAllData() async {
-    await repository.resetAllData();
+    await appRepository.resetAllData();
 
     expenses.clear();
     monthlyIncome = 0;

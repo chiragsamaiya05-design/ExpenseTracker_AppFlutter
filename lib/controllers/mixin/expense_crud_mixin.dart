@@ -4,7 +4,7 @@ import '../../models/expense_model.dart';
 import '../../repositories/expense_repository.dart';
 
 mixin ExpenseCrudMixin on ChangeNotifier {
-  late ExpenseRepository repository;
+  late ExpenseRepository expenseRepository;
   List<Expense> expenses = [];
 
   bool isLoading = false;
@@ -16,7 +16,7 @@ mixin ExpenseCrudMixin on ChangeNotifier {
       errorMessage = null;
       notifyListeners();
 
-      final data = await repository.getExpenses();
+      final data = await expenseRepository.getExpenses();
 
       expenses.clear();
       expenses.addAll(data);
@@ -30,7 +30,7 @@ mixin ExpenseCrudMixin on ChangeNotifier {
 
   Future<void> addExpense(Expense expense) async {
     try {
-      await repository.addExpense(expense);
+      await expenseRepository.addExpense(expense);
       await loadExpenses();
     } catch (e) {
       errorMessage = "Failed to add expense";
@@ -40,7 +40,7 @@ mixin ExpenseCrudMixin on ChangeNotifier {
 
   Future<void> updateExpense(Expense expense) async {
     try {
-      await repository.updateExpense(expense);
+      await expenseRepository.updateExpense(expense);
       await loadExpenses();
     } catch (e) {
       errorMessage = "Failed to update expense";
@@ -50,7 +50,7 @@ mixin ExpenseCrudMixin on ChangeNotifier {
 
   Future<void> deleteExpense(int id) async {
     try {
-      await repository.deleteExpense(id);
+      await expenseRepository.deleteExpense(id);
       await loadExpenses();
     } catch (e) {
       errorMessage = "Failed to delete expense";

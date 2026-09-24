@@ -1,12 +1,14 @@
 import 'package:flutter/cupertino.dart';
 
-import '../../models/expense_model.dart';
+
 import '../../models/monthly_finance_model.dart';
 import '../../models/monthly_summary_model.dart';
+
 import '../../repositories/expense_repository.dart';
+import '../../repositories/finance_repository.dart';
 
 mixin ExpenseDebtMixin  on ChangeNotifier{
-  late ExpenseRepository repository;
+  late FinanceRepository financeRepository;
 
   MonthlyFinance? currentMonthlyFinance;
   double monthlyIncome = 0;
@@ -33,7 +35,7 @@ mixin ExpenseDebtMixin  on ChangeNotifier{
     );
 
     final previousFinance =
-    await repository.getMonthlyFinance(
+    await financeRepository.getMonthlyFinance(
       previousMonth.month,
       previousMonth.year,
     );
@@ -52,7 +54,7 @@ mixin ExpenseDebtMixin  on ChangeNotifier{
     );
 
     final previousFinance =
-    await repository.getMonthlyFinance(
+    await financeRepository.getMonthlyFinance(
       previousMonth.month,
       previousMonth.year,
     );
@@ -77,7 +79,7 @@ mixin ExpenseDebtMixin  on ChangeNotifier{
       decision: 'debt_carried',
     );
 
-    await repository.saveMonthlyFinance(finance);
+    await financeRepository.saveMonthlyFinance(finance);
 
     debt = debtAmount;
     carryForward = 0;
@@ -103,7 +105,7 @@ mixin ExpenseDebtMixin  on ChangeNotifier{
     );
 
     final previousFinance =
-    await repository.getMonthlyFinance(
+    await financeRepository.getMonthlyFinance(
       previousMonth.month,
       previousMonth.year,
     );
@@ -128,7 +130,7 @@ mixin ExpenseDebtMixin  on ChangeNotifier{
       decision: 'debt_settled',
     );
 
-    await repository.saveMonthlyFinance(finance);
+    await financeRepository.saveMonthlyFinance(finance);
 
     debt = 0;
     carryForward = 0;

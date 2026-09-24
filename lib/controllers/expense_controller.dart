@@ -12,8 +12,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../repositories/expense_repository.dart';
+import '../repositories/app_repository.dart';
+import '../repositories/finance_repository.dart';
+import '../repositories/income_repository.dart';
 import '../models/expense_model.dart';
-import '../models/monthly_summary_model.dart';
+
 import '../models/monthly_finance_model.dart';
 
 class ExpenseController extends ChangeNotifier
@@ -26,9 +29,17 @@ with ExpenseCrudMixin,
       ExpenseMonthlyFinanceMixin,
       ExpenseInvestmentMixin,
     ResetMixin {
-  final ExpenseRepository repository;
+  final ExpenseRepository expenseRepository;
+  final IncomeRepository incomeRepository;
+  final FinanceRepository financeRepository;
+  final AppRepository appRepository;
 
-  ExpenseController(this.repository){
+  ExpenseController({
+    required this.expenseRepository,
+    required this.incomeRepository,
+    required this.financeRepository,
+    required this.appRepository,
+  }){
     _initialize();
   }
   MonthlyFinance? currentMonthlyFinance;
@@ -75,7 +86,7 @@ with ExpenseCrudMixin,
 
   Future<void> initializeCurrentMonth() async {
     final income =
-        await repository.getMonthlyIncome() ?? 0;
+        await incomeRepository.getMonthlyIncome() ?? 0;
 
     monthlyIncome = income;
 
@@ -113,7 +124,7 @@ with ExpenseCrudMixin,
   }
 
   Future<void> loadMonthlyFinance() async {
-    final finance = await repository.getMonthlyFinance(
+    final finance = await financeRepository.getMonthlyFinance(
       DateTime.now().month,
       DateTime.now().year,
     );
@@ -155,7 +166,7 @@ with ExpenseCrudMixin,
     );
 
     final previousFinance =
-    await repository.getMonthlyFinance(
+    await financeRepository.getMonthlyFinance(
       previousMonth.month,
       previousMonth.year,
     );

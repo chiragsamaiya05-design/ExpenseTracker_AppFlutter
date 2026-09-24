@@ -2,10 +2,10 @@ import 'package:flutter/cupertino.dart';
 
 
 import '../../models/monthly_finance_model.dart';
-import '../../repositories/expense_repository.dart';
+import '../../repositories/finance_repository.dart';
 
 mixin ExpenseCarryForwardMixin on ChangeNotifier{
-  late ExpenseRepository repository;
+  late FinanceRepository financeRepository;
 
   MonthlyFinance? currentMonthlyFinance;
 
@@ -30,7 +30,7 @@ mixin ExpenseCarryForwardMixin on ChangeNotifier{
     );
 
     final previousFinance =
-    await repository.getMonthlyFinance(
+    await financeRepository.getMonthlyFinance(
       previousMonth.month,
       previousMonth.year,
     );
@@ -55,7 +55,7 @@ mixin ExpenseCarryForwardMixin on ChangeNotifier{
       decision: 'discard',
     );
 
-    await repository.saveMonthlyFinance(finance);
+    await financeRepository.saveMonthlyFinance(finance);
 
     carryForward = 0;
     debt = 0;
@@ -77,7 +77,7 @@ mixin ExpenseCarryForwardMixin on ChangeNotifier{
     );
 
     final previousFinance =
-    await repository.getMonthlyFinance(
+    await financeRepository.getMonthlyFinance(
       previousMonth.month,
       previousMonth.year,
     );
@@ -94,7 +94,7 @@ mixin ExpenseCarryForwardMixin on ChangeNotifier{
     );
 
     final previousFinance =
-    await repository.getMonthlyFinance(
+    await financeRepository.getMonthlyFinance(
       previousMonth.month,
       previousMonth.year,
     );
@@ -119,7 +119,7 @@ mixin ExpenseCarryForwardMixin on ChangeNotifier{
       decision: 'carry_forward',
     );
 
-    await repository.saveMonthlyFinance(finance);
+    await financeRepository.saveMonthlyFinance(finance);
 
     carryForward = previousFinance.remaining;
     debt = 0;
