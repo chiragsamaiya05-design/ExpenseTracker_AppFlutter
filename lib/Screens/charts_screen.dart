@@ -75,7 +75,8 @@ class _ChartsScreenState extends State<ChartsScreen> {
     });
 
     final controller = context.read<ExpenseController>();
-
+    print('CATEGORY: ${controller.categoryExpenses}');
+    print('DAILY: ${controller.dailyExpenses}');
     try {
       await Future.wait([
         controller.loadChartCategoryExpenses(

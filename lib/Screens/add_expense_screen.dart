@@ -103,31 +103,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
             child: Column(
               children: [
         
-                const Text(
-                    "Tilte",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-        
-                const SizedBox(height: 8,),
 
-                AppTextFormField(
-                  controller: titleController,
-                  label: "Expense Title",
-                  hint: "e.g. Lunch, Bus fare, Shopping",
-                  icon: Icons.edit_note_rounded,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return "Please enter an expense title";
-                    }
-
-                    return null;
-                  },
-                ),
-
-                const SizedBox(height: 20),
         
                 const Text(
                   "Amount",
@@ -165,6 +141,31 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                   },
                 ),
         
+                const SizedBox(height: 20),
+                const Text(
+                  "Tilte",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+
+                const SizedBox(height: 8,),
+
+                AppTextFormField(
+                  controller: titleController,
+                  label: "Expense Title",
+                  hint: "e.g. Lunch, Bus fare, Shopping",
+                  icon: Icons.edit_note_rounded,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return "Please enter an expense title";
+                    }
+
+                    return null;
+                  },
+                ),
+
                 const SizedBox(height: 20),
                 const Text(
                   "Date",

@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-class HomeAppBar extends StatefulWidget
+class HomeAppBar extends StatelessWidget
     implements PreferredSizeWidget {
   final bool isSearching;
 
-  final Function(String) onSearchChanged;
+  final ValueChanged<String> onSearchChanged;
   final VoidCallback onSearch;
   final VoidCallback onCloseSearch;
-
+  final VoidCallback onLogout;
 
   const HomeAppBar({
     super.key,
@@ -15,70 +15,54 @@ class HomeAppBar extends StatefulWidget
     required this.onSearchChanged,
     required this.onSearch,
     required this.onCloseSearch,
-
+    required this.onLogout,
   });
-
-  @override
-  State<HomeAppBar> createState() => _HomeAppBarState();
-
-  @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
-}
-
-class _HomeAppBarState extends State<HomeAppBar> {
-  late final TextEditingController _searchController;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _searchController = TextEditingController();
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: const Color(0xFF4F46A5),
-      foregroundColor: Colors.white,
-      title: widget.isSearching
+      title: isSearching
           ? TextField(
-        controller: _searchController,
         autofocus: true,
+        onChanged: onSearchChanged,
         decoration: const InputDecoration(
           hintText: 'Search expenses...',
           border: InputBorder.none,
         ),
-        onChanged: widget.onSearchChanged,
       )
-          : const Text('Expense Tracker',
-        style: TextStyle(color: Colors.white,fontSize: 16),
-
+          : const Text(
+        'Expense Tracker',
       ),
 
       actions: [
-        if (widget.isSearching)
+        if (isSearching)
           IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: () {
-              _searchController.clear();
-              widget.onCloseSearch();
-            },
+            onPressed: onCloseSearch,
+            icon: const Icon(
+              Icons.close,
+            ),
           )
-        else ...[
+        else
           IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: widget.onSearch,
+            onPressed: onSearch,
+            icon: const Icon(
+              Icons.search,
+            ),
           ),
 
-
-        ],
+        // Temporary logout button
+        IconButton(
+          onPressed: onLogout,
+          tooltip: 'Logout',
+          icon: const Icon(
+            Icons.logout_rounded,
+          ),
+        ),
       ],
     );
   }
+
+  @override
+  Size get preferredSize =>
+      const Size.fromHeight(kToolbarHeight);
 }

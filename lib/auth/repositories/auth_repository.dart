@@ -20,4 +20,7 @@ class AuthRepository {
     final user = await getUserByPhone(phone);
     return user != null;
   }
+  Future<UserModel?> getUserById(int id) async {
+    return await database.getUserById(id);
+  }
 }

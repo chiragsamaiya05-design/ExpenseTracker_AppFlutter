@@ -1,7 +1,6 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import '../models/user_model.dart';
 
@@ -25,11 +24,15 @@ class UserDatabase {
       'expense_tracker_users.db',
     );
 
-    return await databaseFactoryFfi.openDatabase(
+    debugPrint('Opening User Database: $path');
+
+    return await databaseFactory.openDatabase(
       path,
       options: OpenDatabaseOptions(
         version: 1,
         onCreate: (db, version) async {
+          debugPrint('Creating users table...');
+
           await db.execute('''
             CREATE TABLE users (
               id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -37,6 +40,8 @@ class UserDatabase {
               created_at TEXT NOT NULL
             )
           ''');
+
+          debugPrint('Users table created.');
         },
       ),
     );
@@ -49,17 +54,24 @@ class UserDatabase {
 
     debugPrint('================ INSERT USER ================');
     debugPrint('User data: $data');
-    debugPrint('=============================================');
 
-    return await db.insert(
+    final userId = await db.insert(
       'users',
       data,
-      conflictAlgorithm: ConflictAlgorithm.ignore,
+      conflictAlgorithm: ConflictAlgorithm.abort,
     );
+
+    debugPrint('Created user ID: $userId');
+    debugPrint('=============================================');
+
+    return userId;
   }
 
   Future<UserModel?> getUserByPhone(String phone) async {
     final db = await database;
+
+    debugPrint('================ FIND USER =================');
+    debugPrint('Searching phone: $phone');
 
     final result = await db.query(
       'users',
@@ -68,15 +80,61 @@ class UserDatabase {
       limit: 1,
     );
 
-    debugPrint('================ USER DATABASE ================');
-    debugPrint('Searching phone: $phone');
     debugPrint('Query result: $result');
-    debugPrint('================================================');
+    debugPrint('=============================================');
 
     if (result.isEmpty) {
       return null;
     }
 
     return UserModel.fromMap(result.first);
+  }
+
+  Future<UserModel?> getUserById(int id) async {
+    final db = await database;
+
+    final result = await db.query(
+      'users',
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+
+    if (result.isEmpty) {
+      return null;
+    }
+
+    return UserModel.fromMap(result.first);
+  }
+  Future<void> deleteDatabase() async {
+    final dbPath = await getDatabasesPath();
+
+    final path = join(
+      dbPath,
+      'expense_tracker_users.db',
+    );
+
+    await databaseFactory.deleteDatabase(path);
+
+    _database = null;
+
+    debugPrint('User database deleted.');
+  }
+  Future<void> resetDatabase() async {
+    final dbPath = await getDatabasesPath();
+
+    final path = join(
+      dbPath,
+      'expense_tracker_users.db',
+    );
+
+    if (_database != null) {
+      await _database!.close();
+      _database = null;
+    }
+
+    await databaseFactory.deleteDatabase(path);
+
+    debugPrint('USER DATABASE RESET: $path');
   }
 }

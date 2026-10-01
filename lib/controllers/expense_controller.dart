@@ -115,10 +115,13 @@ with ExpenseCrudMixin,
     required int month,
     required int year,
   }) async {
-    categoryExpenses = await repository.getCategoryWiseExpenseForMonth(
+    categoryExpenses =
+    await expenseRepository.getCategoryWiseExpenseForMonth(
       month: month,
       year: year,
     );
+
+
 
     notifyListeners();
   }
@@ -148,10 +151,13 @@ with ExpenseCrudMixin,
     required int month,
     required int year,
   }) async {
-    dailyExpenses = await repository.getDailyExpenseForMonth(
+    dailyExpenses =
+    await expenseRepository.getDailyExpenseForMonth(
       month: month,
       year: year,
     );
+
+
 
     notifyListeners();
   }

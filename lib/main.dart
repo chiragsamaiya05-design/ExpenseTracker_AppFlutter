@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:expense_tracker/Screens/main_navigation_screen.dart';
+import 'package:expense_tracker/auth/services/auth_session.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -22,14 +23,26 @@ import 'auth/controllers/auth_controller.dart';
 import 'auth/repositories/auth_repository.dart';
 import 'auth/database/user_database.dart';
 import 'auth/screens/login_screen.dart';
+import 'auth/services/auth_session.dart';
+import 'auth/screens/auth_gate.dart';
 
-void main(){
-  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  if (Platform.isWindows ||
+      Platform.isLinux ||
+      Platform.isMacOS) {
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
   }
-  final database = ExpensesDatabase();
+
   final userDatabase = UserDatabase();
+
+  // TEMPORARY: reset the authentication database once
+  await userDatabase.resetDatabase();
+
+  final database = ExpensesDatabase();
+
   runApp(
     MultiProvider(
       providers: [
@@ -38,8 +51,10 @@ void main(){
             repository: AuthRepository(
               database: userDatabase,
             ),
+            session: AuthSession(),
           ),
         ),
+
         ChangeNotifierProvider(
           create: (_) => ExpenseController(
             expenseRepository: ExpenseRepository(
@@ -56,18 +71,16 @@ void main(){
             ),
           ),
         ),
-          ChangeNotifierProvider(
+
+        ChangeNotifierProvider(
           create: (_) => BudgetController(
-          repository: BudgetRepository(
-          database: ExpensesDatabase(),
+            repository: BudgetRepository(
+              database: database,
+            ),
           ),
-          ),
-  ),
-        ],
-
-        child: const ExpenseTracker(),
-
-
+        ),
+      ],
+      child: const ExpenseTracker(),
     ),
   );
 }
@@ -94,7 +107,7 @@ class ExpenseTracker extends StatelessWidget{
         ),
       ),
 
-      home: const LoginScreen(),
+      home: const AuthGate(),
     );
   }
 }
