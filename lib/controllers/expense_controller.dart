@@ -67,13 +67,30 @@ with ExpenseCrudMixin,
 
 
   Future<void> _initialize() async {
-
     isLoading = true;
     notifyListeners();
 
     await loadExpenses();
+
+    debugPrint("AFTER loadExpenses: ${expenses.length}");
+
     await loadIncome();
+
+    debugPrint("MONTHLY INCOME: $monthlyIncome");
+
     await loadMonthlySummaries();
+
+    debugPrint(
+      "MONTHLY SUMMARIES: ${monthlySummaries.length}",
+    );
+
+    for (final summary in monthlySummaries) {
+      debugPrint(
+        "SUMMARY -> ${summary.month}/${summary.year} "
+            "Income: ${summary.income} "
+            "Expense: ${summary.totalExpense}",
+      );
+    }
 
     await loadMonthlyFinance();
     await initializeCurrentMonth();
@@ -81,12 +98,12 @@ with ExpenseCrudMixin,
 
     isLoading = false;
     notifyListeners();
-
   }
 
   Future<void> initializeCurrentMonth() async {
+    final now = DateTime.now();
     final income =
-        await incomeRepository.getMonthlyIncome() ?? 0;
+        await incomeRepository.getMonthlyIncome(now.month,now.year) ?? 0;
 
     monthlyIncome = income;
 
@@ -106,15 +123,12 @@ with ExpenseCrudMixin,
   }
 
   Future<void> loadCategoryExpenses() async {
-    categoryExpenses = await repository.getCategoryExpenses();
+    categoryExpenses = await expenseRepository.getCategoryExpenses();
 
     notifyListeners();
   }
 
-  Future<void> loadChartCategoryExpenses({
-    required int month,
-    required int year,
-  }) async {
+  Future<void> loadChartCategoryExpenses({required int month, required int year,}) async {
     categoryExpenses =
     await expenseRepository.getCategoryWiseExpenseForMonth(
       month: month,
@@ -147,10 +161,7 @@ with ExpenseCrudMixin,
     notifyListeners();
   }
 
-  Future<void> loadDailyChartExpenses({
-    required int month,
-    required int year,
-  }) async {
+  Future<void> loadDailyChartExpenses({required int month, required int year,}) async {
     dailyExpenses =
     await expenseRepository.getDailyExpenseForMonth(
       month: month,
@@ -220,6 +231,8 @@ with ExpenseCrudMixin,
 
     notifyListeners();
   }
+
+
   double getSpentForCategory(String category) {
     final now = DateTime.now();
 

@@ -2,31 +2,40 @@ import '../database/expenses_DataBase.dart';
 import '../models/monthly_finance_model.dart';
 
 class FinanceRepository {
-   final ExpensesDatabase database;
+  final ExpensesDatabase database;
+  final int userId;
 
-   FinanceRepository({
-   required this.database,
-});
-   Future<void> saveMonthlyFinance(MonthlyFinance finance) async{
-     await database.saveMonthlyFinance(month: finance.month,
-       year: finance.year,
-       income: finance.income,
-       totalExpense: finance.totalExpense,
-       remaining: finance.remaining,
-       carryForward: finance.carryForward,
-       debt: finance.debt,
-       investment: finance.investment,
-       carryForwardApproved: finance.carryForwardApproved,
+  FinanceRepository({
+    required this.database,
+    required this.userId,
+  });
 
-     );
-   }
+  Future<MonthlyFinance?> getMonthlyFinance(
+      int month,
+      int year,
+      ) async {
+    return await database.getMonthlyFinance(
+      month,
+      year,
+      userId,
+    );
+  }
 
-   Future<MonthlyFinance?>getMonthlyFinance(int month, int year,) async{
-     final data = await database.getMonthlyFinance(month, year);
+  Future<int> saveMonthlyFinance(
+      MonthlyFinance finance,
+      ) async {
+    return await database.saveMonthlyFinance(
+      finance,
+      userId,
+    );
+  }
 
-     if(data == null){
-       return null;
-     }
-     return MonthlyFinance.fromMap(data);
-   }
+  Future<int> updateMonthlyFinance(
+      MonthlyFinance finance,
+      ) async {
+    return await database.updateMonthlyFinance(
+      finance,
+      userId,
+    );
+  }
 }

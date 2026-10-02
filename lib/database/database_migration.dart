@@ -6,6 +6,10 @@ class DatabaseMigrations {
       int oldVersion,
       int newVersion,
       ) async {
+    // ============================================================
+    // VERSION 1 → 2
+    // MONTHLY INCOME
+    // ============================================================
     if (oldVersion < 2) {
       await db.execute('''
         CREATE TABLE monthly_income(
@@ -18,6 +22,10 @@ class DatabaseMigrations {
       ''');
     }
 
+    // ============================================================
+    // VERSION 2 → 3
+    // BUDGETS
+    // ============================================================
     if (oldVersion < 3) {
       await db.execute('''
         CREATE TABLE budgets(
@@ -30,6 +38,10 @@ class DatabaseMigrations {
       ''');
     }
 
+    // ============================================================
+    // VERSION 3 → 4
+    // MONTHLY FINANCE
+    // ============================================================
     if (oldVersion < 4) {
       await db.execute('''
         CREATE TABLE monthly_finance(
@@ -52,9 +64,35 @@ class DatabaseMigrations {
       ''');
     }
 
+    // ============================================================
+    // VERSION 4 → 5
+    // ADD DECISION
+    // ============================================================
     if (oldVersion < 5) {
       await db.execute(
         'ALTER TABLE monthly_finance ADD COLUMN decision TEXT',
+      );
+    }
+
+    // ============================================================
+    // VERSION 5 → 6
+    // ADD USER ID
+    // ============================================================
+    if (oldVersion < 6) {
+      await db.execute(
+        'ALTER TABLE expense ADD COLUMN user_id INTEGER',
+      );
+
+      await db.execute(
+        'ALTER TABLE monthly_income ADD COLUMN user_id INTEGER',
+      );
+
+      await db.execute(
+        'ALTER TABLE budgets ADD COLUMN user_id INTEGER',
+      );
+
+      await db.execute(
+        'ALTER TABLE monthly_finance ADD COLUMN user_id INTEGER',
       );
     }
   }

@@ -8,6 +8,7 @@ import '../widgets/auth_header.dart';
 import '../widgets/change_number_button.dart';
 import '../widgets/login_button.dart';
 import '../widgets/otp_section.dart';
+import 'auth_gate.dart';
 import 'login_screen.dart';
 import 'signup_screen.dart';
 import '../../Screens/main_navigation_screen.dart';
@@ -83,10 +84,9 @@ class _OtpVerificationScreenState
     }
 
     if (success) {
-      Navigator.pushAndRemoveUntil(
-        context,
+      Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(
-          builder: (_) => const MainNavigationScreen(),
+          builder: (_) => const AuthGate(),
         ),
             (route) => false,
       );

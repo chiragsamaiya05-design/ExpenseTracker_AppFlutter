@@ -17,7 +17,6 @@ class _AuthGateState extends State<AuthGate> {
   void initState() {
     super.initState();
 
-    // Restore login session after the screen is created.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<AuthController>().restoreSession();
     });
@@ -27,7 +26,6 @@ class _AuthGateState extends State<AuthGate> {
   Widget build(BuildContext context) {
     final authController = context.watch<AuthController>();
 
-    // While checking saved session
     if (authController.isLoading) {
       return const Scaffold(
         body: Center(
@@ -36,12 +34,11 @@ class _AuthGateState extends State<AuthGate> {
       );
     }
 
-    // User is already logged in
-    if (authController.isLoggedIn) {
-      return const MainNavigationScreen();
+    if (!authController.isLoggedIn ||
+        authController.currentUser?.id == null) {
+      return const LoginScreen();
     }
 
-    // User is not logged in
-    return const LoginScreen();
+    return const MainNavigationScreen();
   }
 }

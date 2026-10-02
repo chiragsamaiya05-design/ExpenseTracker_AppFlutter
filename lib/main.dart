@@ -1,9 +1,14 @@
 import 'dart:io';
 
-import 'package:expense_tracker/Screens/main_navigation_screen.dart';
-import 'package:expense_tracker/auth/services/auth_session.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+
+import 'auth/screens/auth_gate.dart';
+import 'auth/controllers/auth_controller.dart';
+import 'auth/database/user_database.dart';
+import 'auth/repositories/auth_repository.dart';
+import 'auth/services/auth_session.dart';
 
 import 'controllers/expense_controller.dart';
 import 'controllers/budget_controller.dart';
@@ -15,16 +20,7 @@ import 'repositories/finance_repository.dart';
 import 'repositories/app_repository.dart';
 
 import 'database/expenses_DataBase.dart';
-
-import 'Screens/home_screen.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-
-import 'auth/controllers/auth_controller.dart';
-import 'auth/repositories/auth_repository.dart';
-import 'auth/database/user_database.dart';
-import 'auth/screens/login_screen.dart';
-import 'auth/services/auth_session.dart';
-import 'auth/screens/auth_gate.dart';
+import 'database/app_database.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,11 +34,6 @@ void main() async {
 
   final userDatabase = UserDatabase();
 
-  // TEMPORARY: reset the authentication database once
-  await userDatabase.resetDatabase();
-
-  final database = ExpensesDatabase();
-
   runApp(
     MultiProvider(
       providers: [
@@ -54,42 +45,19 @@ void main() async {
             session: AuthSession(),
           ),
         ),
-
-        ChangeNotifierProvider(
-          create: (_) => ExpenseController(
-            expenseRepository: ExpenseRepository(
-              database: database,
-            ),
-            incomeRepository: IncomeRepository(
-              database: database,
-            ),
-            financeRepository: FinanceRepository(
-              database: database,
-            ),
-            appRepository: AppRepository(
-              database: database,
-            ),
-          ),
-        ),
-
-        ChangeNotifierProvider(
-          create: (_) => BudgetController(
-            repository: BudgetRepository(
-              database: database,
-            ),
-          ),
-        ),
       ],
       child: const ExpenseTracker(),
     ),
   );
 }
 
-class ExpenseTracker extends StatelessWidget{
-  const ExpenseTracker ({super.key});
+class ExpenseTracker extends StatelessWidget {
+  const ExpenseTracker({super.key});
 
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
+    final authController = context.watch<AuthController>();
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
 
@@ -106,6 +74,60 @@ class ExpenseTracker extends StatelessWidget{
           elevation: 0,
         ),
       ),
+
+      builder: (context, child) {
+        // User is not logged in.
+        // Don't create expense-related providers.
+        if (!authController.isLoggedIn ||
+            authController.currentUser?.id == null) {
+          return child!;
+        }
+
+        final userId = authController.currentUser!.id!;
+
+        final database = ExpensesDatabase(
+          appDatabase: AppDatabase(),
+        );
+
+        return MultiProvider(
+          providers: [
+            ChangeNotifierProvider(
+              create: (_) => ExpenseController(
+                expenseRepository: ExpenseRepository(
+                  database: database,
+                  userId: userId,
+                ),
+                incomeRepository: IncomeRepository(
+                  database: database,
+                  userId: userId,
+                ),
+                financeRepository: FinanceRepository(
+                  database: database,
+                  userId: userId,
+                ),
+                appRepository: AppRepository(
+                  database: database,
+                  userId: userId,
+                ),
+              ),
+            ),
+
+            ChangeNotifierProvider(
+              create: (_) => BudgetController(
+                repository: BudgetRepository(
+                  database: database,
+                  userId: userId,
+                ),
+              ),
+            ),
+          ],
+
+          // IMPORTANT:
+          // child is the Navigator, so these providers
+          // are now ABOVE every route.
+          child: child!,
+        );
+      },
 
       home: const AuthGate(),
     );

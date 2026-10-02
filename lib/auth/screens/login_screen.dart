@@ -24,7 +24,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
 
 
-  bool isOtpSelected = false;
+  bool isOtpSelected = true;
 
   String? phoneError;
   String? passwordError;

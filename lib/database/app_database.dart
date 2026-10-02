@@ -16,7 +16,7 @@ class AppDatabase {
         await getDatabasesPath(),
         'expenseDataBase.db',
       ),
-      version: 5,
+      version: 6,
       onCreate: (db, version) async {
         await db.execute(DatabaseTables.expense);
         await db.execute(DatabaseTables.monthlyIncome);
