@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 import '../constants/add_color.dart';
 
 class BudgetCard extends StatelessWidget {
@@ -52,7 +51,6 @@ class BudgetCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
-
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -60,24 +58,20 @@ class BudgetCard extends StatelessWidget {
           color: AppColors.border,
         ),
       ),
-
       child: Column(
-        crossAxisAlignment:
-        CrossAxisAlignment.start,
-
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Category + menu
+          // ─────────────────────────────────
+          // Category + Menu
+          // ─────────────────────────────────
           Row(
             children: [
               Container(
                 padding: const EdgeInsets.all(9),
-
                 decoration: BoxDecoration(
                   color: AppColors.primaryLight,
-                  borderRadius:
-                  BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(10),
                 ),
-
                 child: Icon(
                   icon,
                   size: 20,
@@ -101,25 +95,43 @@ class BudgetCard extends StatelessWidget {
                 icon: const Icon(
                   Icons.more_vert_rounded,
                 ),
-
                 onSelected: (value) {
-                  if (value == 'edit') {
-                    onEdit?.call();
-                  }
+                  switch (value) {
+                    case 'edit':
+                      onEdit?.call();
+                      break;
 
-                  if (value == 'delete') {
-                    onDelete?.call();
+                    case 'delete':
+                      onDelete?.call();
+                      break;
                   }
                 },
-
                 itemBuilder: (context) => const [
                   PopupMenuItem(
                     value: 'edit',
-                    child: Text('Edit'),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.edit_rounded,
+                          size: 18,
+                        ),
+                        SizedBox(width: 10),
+                        Text('Edit'),
+                      ],
+                    ),
                   ),
                   PopupMenuItem(
                     value: 'delete',
-                    child: Text('Delete'),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.delete_outline_rounded,
+                          size: 18,
+                        ),
+                        SizedBox(width: 10),
+                        Text('Delete'),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -128,11 +140,11 @@ class BudgetCard extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          // Amount
+          // ─────────────────────────────────
+          // Spent / Budget + Percentage
+          // ─────────────────────────────────
           Row(
-            crossAxisAlignment:
-            CrossAxisAlignment.end,
-
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
                 '₹${spent.toStringAsFixed(0)}',
@@ -155,7 +167,9 @@ class BudgetCard extends StatelessWidget {
               const Spacer(),
 
               Text(
-                '${(progress * 100).toStringAsFixed(0)}%',
+                isOverBudget
+                    ? 'Over Budget'
+                    : '${(progress * 100).toStringAsFixed(0)}%',
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
@@ -167,18 +181,16 @@ class BudgetCard extends StatelessWidget {
 
           const SizedBox(height: 10),
 
-          // Progress bar
+          // ─────────────────────────────────
+          // Progress Bar
+          // ─────────────────────────────────
           ClipRRect(
-            borderRadius:
-            BorderRadius.circular(10),
-
+            borderRadius: BorderRadius.circular(10),
             child: LinearProgressIndicator(
               value: progress,
               minHeight: 8,
-              backgroundColor:
-              AppColors.border,
-              valueColor:
-              AlwaysStoppedAnimation<Color>(
+              backgroundColor: AppColors.border,
+              valueColor: AlwaysStoppedAnimation<Color>(
                 progressColor,
               ),
             ),
@@ -186,7 +198,9 @@ class BudgetCard extends StatelessWidget {
 
           const SizedBox(height: 10),
 
-          // Remaining
+          // ─────────────────────────────────
+          // Remaining / Over Budget
+          // ─────────────────────────────────
           Row(
             children: [
               Icon(
@@ -199,15 +213,16 @@ class BudgetCard extends StatelessWidget {
 
               const SizedBox(width: 6),
 
-              Text(
-                isOverBudget
-                    ? '₹${remaining.abs().toStringAsFixed(0)} over budget'
-                    : '₹${remaining.toStringAsFixed(0)} remaining',
-
-                style: TextStyle(
-                  fontSize: 13,
-                  color: progressColor,
-                  fontWeight: FontWeight.w500,
+              Expanded(
+                child: Text(
+                  isOverBudget
+                      ? '₹${remaining.abs().toStringAsFixed(0)} over budget'
+                      : '₹${remaining.toStringAsFixed(0)} remaining',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: progressColor,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
             ],

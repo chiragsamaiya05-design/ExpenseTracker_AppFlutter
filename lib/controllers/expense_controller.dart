@@ -1,4 +1,6 @@
 
+import 'package:expense_tracker/controllers/mixin/daily_budget_mixin.dart';
+import 'package:expense_tracker/controllers/mixin/expense_budget_mixin.dart';
 import 'package:expense_tracker/controllers/mixin/expense_carry_forward_mixin.dart';
 import 'package:expense_tracker/controllers/mixin/expense_crud_mixin.dart';
 import 'package:expense_tracker/controllers/mixin/expense_debt_mixin.dart';
@@ -8,13 +10,17 @@ import 'package:expense_tracker/controllers/mixin/expense_investment_mixin.dart'
 import 'package:expense_tracker/controllers/mixin/expense_monthly_finance_mixin.dart';
 import 'package:expense_tracker/controllers/mixin/expense_summary_mixin.dart';
 import 'package:expense_tracker/controllers/mixin/reset_mixin.dart';
+import 'package:expense_tracker/controllers/mixin/expense_budget_mixin.dart';
+import 'package:expense_tracker/controllers/mixin/daily_budget_mixin.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../repositories/budget_repository.dart';
 import '../repositories/expense_repository.dart';
 import '../repositories/app_repository.dart';
 import '../repositories/finance_repository.dart';
 import '../repositories/income_repository.dart';
+import '../repositories/daily_budget_repository.dart';
 import '../models/expense_model.dart';
 
 import '../models/monthly_finance_model.dart';
@@ -28,27 +34,31 @@ with ExpenseCrudMixin,
       ExpenseDebtMixin,
       ExpenseMonthlyFinanceMixin,
       ExpenseInvestmentMixin,
+      ExpenseBudgetMixin,
+      DailyBudgetMixin,
     ResetMixin {
   final ExpenseRepository expenseRepository;
   final IncomeRepository incomeRepository;
   final FinanceRepository financeRepository;
   final AppRepository appRepository;
 
+
   ExpenseController({
     required this.expenseRepository,
     required this.incomeRepository,
     required this.financeRepository,
     required this.appRepository,
+    required BudgetRepository budgetRepository,
+    required DailyBudgetRepository dailyBudgetRepository,
   }){
+    initializeBudgetRepository(budgetRepository);
+    initializeDailyBudgetRepository(dailyBudgetRepository);
     _initialize();
   }
   MonthlyFinance? currentMonthlyFinance;
 
   final List<Expense> expenses = [];
   Map<int, double> dailyExpenses = {};
-
-
-
   double carryForward = 0;
   double debt = 0;
   double investment = 0;
@@ -63,34 +73,16 @@ with ExpenseCrudMixin,
   Map<String, double> categoryExpenses = {};
 
 
-
-
-
   Future<void> _initialize() async {
     isLoading = true;
     notifyListeners();
 
     await loadExpenses();
-
-    debugPrint("AFTER loadExpenses: ${expenses.length}");
-
     await loadIncome();
-
-    debugPrint("MONTHLY INCOME: $monthlyIncome");
-
     await loadMonthlySummaries();
+    await loadCurrentMonthBudget();
+    await loadDailyBudget();
 
-    debugPrint(
-      "MONTHLY SUMMARIES: ${monthlySummaries.length}",
-    );
-
-    for (final summary in monthlySummaries) {
-      debugPrint(
-        "SUMMARY -> ${summary.month}/${summary.year} "
-            "Income: ${summary.income} "
-            "Expense: ${summary.totalExpense}",
-      );
-    }
 
     await loadMonthlyFinance();
     await initializeCurrentMonth();
@@ -167,9 +159,6 @@ with ExpenseCrudMixin,
       month: month,
       year: year,
     );
-
-
-
     notifyListeners();
   }
 

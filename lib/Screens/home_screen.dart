@@ -3,6 +3,11 @@ import 'package:provider/provider.dart';
 
 import '../models/expense_model.dart';
 
+import '../widgets/add_daily_budget_bottom_sheet.dart';
+import '../widgets/add_daily_budget_card.dart';
+import '../widgets/budget_status_card.dart';
+import '../widgets/add_daily_budget_bottom_sheet.dart';
+import '../widgets/daily_budget_card.dart';
 import 'add_expense_screen.dart';
 import 'edit_expense_screen.dart';
 import 'all_expenses_screen.dart';
@@ -33,9 +38,7 @@ class HomeScreen extends StatelessWidget {
 
     return MonthlySettlementListener(
       child: Scaffold(
-        // =====================================================
-        // APP BAR
-        // =====================================================
+
 
         appBar: HomeAppBar(
           isSearching: controller.isSearching,
@@ -87,28 +90,54 @@ class HomeScreen extends StatelessWidget {
 
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-
                 children: [
-                  // =================================================
-                  // BALANCE CARD
-                  // =================================================
 
-                  BalanceCard(
-                    balance: controller.totalBalance,
+
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: BalanceCard(
+                          balance: controller.totalBalance,
+                        ),
+                      ),
+
+                      const SizedBox(width: 12),
+
+                      Expanded(
+                        child: DailyBudgetCard(
+                          dailyBudget: controller.dailyBudget,
+                          remaining: controller.dailyBudgetRemaining,
+                          isExceeded: controller.isDailyBudgetExceeded,
+                          onEdit: () {
+                            showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              shape: const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.vertical(
+                                  top: Radius.circular(24),
+                                ),
+                              ),
+                              builder: (_) {
+                                return AddDailyBudgetBottomSheet(
+                                  currentBudget: controller.dailyBudget,
+                                  isLoading: controller.isDailyBudgetLoading,
+                                  onSave: (amount) async {
+                                    await controller.saveDailyBudget(amount);
+                                  },
+                                );
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                    ],
                   ),
 
                   const SizedBox(height: 14),
 
-                  // =================================================
-                  // INCOME + EXPENSE CARDS
-                  // =================================================
-
                   Row(
                     children: [
-                      // -------------------------
-                      // INCOME
-                      // -------------------------
-
                       Expanded(
                         child: IncomeExpenseCard(
                           title: 'Income',
@@ -131,10 +160,6 @@ class HomeScreen extends StatelessWidget {
 
                       const SizedBox(width: 16),
 
-                      // -------------------------
-                      // EXPENSE
-                      // -------------------------
-
                       Expanded(
                         child: IncomeExpenseCard(
                           title: 'Expense',
@@ -156,10 +181,6 @@ class HomeScreen extends StatelessWidget {
                   ),
 
                   const SizedBox(height: 16),
-
-                  // =================================================
-                  // RECENT TRANSACTIONS HEADER
-                  // =================================================
 
                   Row(
                     mainAxisAlignment:
@@ -218,11 +239,7 @@ class HomeScreen extends StatelessWidget {
 
                   const SizedBox(height: 8),
 
-                  // =================================================
-                  // RECENT TRANSACTIONS LIST
-                  // =================================================
-
-                  Expanded(
+                  Flexible(
                     child: recentExpenses.isEmpty
                         ? const Center(
                       child: Text(
@@ -233,58 +250,43 @@ class HomeScreen extends StatelessWidget {
                       ),
                     )
                         : ListView.builder(
+                      padding: EdgeInsets.zero,
                       itemCount: recentExpenses.length,
-
-                      itemBuilder:
-                          (context, index) {
-                        final expense =
-                        recentExpenses[index];
+                      itemBuilder: (context, index) {
+                        final expense = recentExpenses[index];
 
                         return ExpenseListItem(
                           expense: expense,
 
-                          // -------------------------
-                          // EDIT
-                          // -------------------------
-
                           onEdit: () async {
-                            final Expense?
-                            updatedExpense =
+                            final Expense? updatedExpense =
                             await Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) =>
-                                    EditExpenseScreen(
-                                      expense: expense,
-                                    ),
+                                builder: (_) => EditExpenseScreen(
+                                  expense: expense,
+                                ),
                               ),
                             );
 
                             if (updatedExpense != null) {
-                              await controller
-                                  .updateExpense(
+                              await controller.updateExpense(
                                 updatedExpense,
                               );
                             }
                           },
 
-                          // -------------------------
-                          // DELETE
-                          // -------------------------
-
                           onDelete: () async {
                             final confirmed =
                             await showConfirmationDialog(
                               context,
-                              title:
-                              'Delete Expense',
+                              title: 'Delete Expense',
                               message:
                               'Are you sure you want to delete this expense?',
                             );
 
                             if (confirmed) {
-                              await controller
-                                  .deleteExpense(
+                              await controller.deleteExpense(
                                 expense.id!,
                               );
                             }
@@ -299,9 +301,7 @@ class HomeScreen extends StatelessWidget {
           },
         ),
 
-        // =====================================================
-        // FLOATING ACTION BUTTON
-        // =====================================================
+
 
         floatingActionButton:
         FloatingActionButton(

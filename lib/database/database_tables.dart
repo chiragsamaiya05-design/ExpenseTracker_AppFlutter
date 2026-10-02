@@ -49,4 +49,13 @@ class DatabaseTables {
       UNIQUE(month, year)
     )
   ''';
+  static const String dailyBudget = '''
+    CREATE TABLE daily_budget(
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      date TEXT NOT NULL,
+      amount REAL NOT NULL,
+      UNIQUE(user_id, date)
+    )
+  ''';
 }

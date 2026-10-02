@@ -10,47 +10,54 @@ class BalanceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Container(
+      height: 136,
       width: double.infinity,
       padding: const EdgeInsets.symmetric(
-        horizontal: 20,
-        vertical: 20,
+        horizontal: 16,
+        vertical: 13,
       ),
       decoration: BoxDecoration(
         color: const Color(0xFFE8E7FF),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(
           color: const Color(0xFFD6D4FF),
         ),
       ),
-      child: Row(
-        mainAxisAlignment: .center,
+      child: Column(
+        mainAxisAlignment: .start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Center(
-            child: Column(
+          // Header
+          const Text(
+            'Total Balance',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF292747),
+            ),
+          ),
 
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const Text(
-                  'Total Balance',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Color(0xFF686780),
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
+          const SizedBox(height: 14),
 
-                const SizedBox(height: 4),
+          Text(
+            '₹${balance.toStringAsFixed(0)}',
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF292747),
+            ),
+          ),
 
-                Text(
-                  '₹${balance.toStringAsFixed(2)}',
-                  style: const TextStyle(
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF292747),
-                  ),
-                ),
-              ],
+          const SizedBox(height: 3),
+
+          Text(
+            'Available balance',
+            style: TextStyle(
+              fontSize: 11,
+              color: theme.colorScheme.onSurface.withOpacity(0.5),
             ),
           ),
         ],

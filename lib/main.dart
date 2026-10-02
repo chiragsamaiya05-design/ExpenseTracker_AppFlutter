@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:expense_tracker/repositories/daily_budget_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -106,6 +107,14 @@ class ExpenseTracker extends StatelessWidget {
                   userId: userId,
                 ),
                 appRepository: AppRepository(
+                  database: database,
+                  userId: userId,
+                ),
+                budgetRepository: BudgetRepository(
+                  database: database,
+                  userId: userId,
+                ),
+                dailyBudgetRepository: DailyBudgetRepository(
                   database: database,
                   userId: userId,
                 ),

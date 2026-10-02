@@ -95,5 +95,16 @@ class DatabaseMigrations {
         'ALTER TABLE monthly_finance ADD COLUMN user_id INTEGER',
       );
     }
+    if (oldVersion < 7) {
+      await db.execute('''
+    CREATE TABLE daily_budget (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      date TEXT NOT NULL,
+      amount REAL NOT NULL,
+      UNIQUE(user_id, date)
+    )
+  ''');
+    }
   }
 }

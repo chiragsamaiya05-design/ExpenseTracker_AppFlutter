@@ -386,4 +386,51 @@ class ExpensesDatabase {
     );
   }
 
+  Future<void> saveDailyBudget(String date, double amount, int userId,) async {
+    final db = await database;
+
+    await db.insert(
+      'daily_budget',
+      {
+        'user_id': userId,
+        'date': date,
+        'amount': amount,
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<double?> getDailyBudget(
+      String date,
+      int userId,
+      ) async {
+    final db = await database;
+
+    final result = await db.query(
+      'daily_budget',
+      where: 'user_id = ? AND date = ?',
+      whereArgs: [userId, date],
+      limit: 1,
+    );
+
+    if (result.isEmpty) {
+      return null;
+    }
+
+    return (result.first['amount'] as num).toDouble();
+  }
+
+  Future<int> deleteDailyBudget(
+      String date,
+      int userId,
+      ) async {
+    final db = await database;
+
+    return await db.delete(
+      'daily_budget',
+      where: 'user_id = ? AND date = ?',
+      whereArgs: [userId, date],
+    );
+  }
 }
+
