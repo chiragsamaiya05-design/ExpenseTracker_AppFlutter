@@ -32,7 +32,7 @@ class SignupPrompt extends StatelessWidget {
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF263AA5),
+              color: Color(0xFF4F46A5),
             ),
           ),
         ),

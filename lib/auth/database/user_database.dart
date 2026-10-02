@@ -23,25 +23,31 @@ class UserDatabase {
       dbPath,
       'expense_tracker_users.db',
     );
-
-    debugPrint('Opening User Database: $path');
-
     return await databaseFactory.openDatabase(
       path,
       options: OpenDatabaseOptions(
-        version: 1,
+        version: 3,
         onCreate: (db, version) async {
-          debugPrint('Creating users table...');
-
           await db.execute('''
-            CREATE TABLE users (
-              id INTEGER PRIMARY KEY AUTOINCREMENT,
-              phone TEXT UNIQUE NOT NULL,
-              created_at TEXT NOT NULL
-            )
-          ''');
+          CREATE TABLE users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            phone TEXT UNIQUE NOT NULL,
+            password_hash TEXT,
+            created_at TEXT NOT NULL
+          )
+        ''');
 
-          debugPrint('Users table created.');
+
+        },
+
+
+        onUpgrade: (db, oldVersion, newVersion) async {
+          if (oldVersion < 3) {
+            await db.execute('''
+            ALTER TABLE users
+            ADD COLUMN password_hash TEXT
+          ''');
+          }
         },
       ),
     );
@@ -52,36 +58,22 @@ class UserDatabase {
 
     final data = user.toMap();
 
-    debugPrint('================ INSERT USER ================');
-    debugPrint('User data: $data');
-
     final userId = await db.insert(
       'users',
       data,
       conflictAlgorithm: ConflictAlgorithm.abort,
     );
-
-    debugPrint('Created user ID: $userId');
-    debugPrint('=============================================');
-
     return userId;
   }
 
   Future<UserModel?> getUserByPhone(String phone) async {
     final db = await database;
-
-    debugPrint('================ FIND USER =================');
-    debugPrint('Searching phone: $phone');
-
     final result = await db.query(
       'users',
       where: 'phone = ?',
       whereArgs: [phone],
       limit: 1,
     );
-
-    debugPrint('Query result: $result');
-    debugPrint('=============================================');
 
     if (result.isEmpty) {
       return null;

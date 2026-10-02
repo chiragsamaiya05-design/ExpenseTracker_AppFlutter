@@ -24,7 +24,7 @@ class ForgotPasswordButton extends StatelessWidget {
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w500,
-            color: Color(0xFF263AA5),
+            color: Color(0xFF4F46A5),
           ),
         ),
       ),

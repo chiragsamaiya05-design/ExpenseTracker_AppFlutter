@@ -7,6 +7,7 @@ import '../widgets/login_button.dart';
 import '../widgets/phone_number_field.dart';
 import 'login_screen.dart';
 import 'otp_verification_screen.dart';
+import '../widgets/password_field.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -16,55 +17,79 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> {
-  final TextEditingController phoneController =
-  TextEditingController();
-
+  final TextEditingController phoneController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
   String? phoneError;
+  String? passwordError;
+  String? confirmPasswordError;
 
-  // =========================
+
   // PHONE VALIDATION
-  // =========================
-
-  bool _validatePhone() {
+  bool _validateSignup() {
     final phone = phoneController.text.trim();
+    final password = passwordController.text;
+    final confirmPassword = confirmPasswordController.text;
+
+    setState(() {
+      phoneError = null;
+      passwordError = null;
+      confirmPasswordError = null;
+    });
+
+    bool isValid = true;
 
     if (phone.isEmpty) {
       setState(() {
         phoneError = 'Please enter your mobile number';
       });
-
-      return false;
-    }
-
-    if (phone.length != 10) {
+      isValid = false;
+    } else if (phone.length != 10) {
       setState(() {
         phoneError = 'Enter a valid 10-digit mobile number';
       });
-
-      return false;
+      isValid = false;
     }
 
-    setState(() {
-      phoneError = null;
-    });
+    if (password.isEmpty) {
+      setState(() {
+        passwordError = 'Please create a password';
+      });
+      isValid = false;
+    } else if (password.length < 6) {
+      setState(() {
+        passwordError = 'Password must be at least 6 characters';
+      });
+      isValid = false;
+    }
 
-    return true;
+    if (confirmPassword.isEmpty) {
+      setState(() {
+        confirmPasswordError = 'Please confirm your password';
+      });
+      isValid = false;
+    } else if (password != confirmPassword) {
+      setState(() {
+        confirmPasswordError = 'Passwords do not match';
+      });
+      isValid = false;
+    }
+
+    return isValid;
   }
 
-  // =========================
-  // CONTINUE SIGNUP
-  // =========================
 
+  // CONTINUE SIGNUP
   void _continueSignup() {
-    if (!_validatePhone()) {
+    if (!_validateSignup()) {
       return;
     }
-
     final phone = phoneController.text.trim();
-
-    // Tell AuthController this is a signup flow.
-    context.read<AuthController>().startSignup(phone);
-
+    final password = passwordController.text;
+    context.read<AuthController>().startSignup(
+      phone,
+      password,
+    );
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -75,21 +100,16 @@ class _SignupScreenState extends State<SignupScreen> {
       ),
     );
   }
-
-  // =========================
   // DISPOSE
-  // =========================
-
   @override
   void dispose() {
     phoneController.dispose();
+    passwordController.dispose();
+    confirmPasswordController.dispose();
     super.dispose();
   }
 
-  // =========================
   // BUILD
-  // =========================
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -114,31 +134,36 @@ class _SignupScreenState extends State<SignupScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // =========================
-                  // HEADER
-                  // =========================
 
+                  // HEADER
                   const AuthHeader(
                     subtitle: 'Create your Account',
                   ),
 
                   const SizedBox(height: 30),
 
-                  // =========================
                   // PHONE
-                  // =========================
-
                   PhoneNumberField(
                     controller: phoneController,
                     errorText: phoneError,
                   ),
+                  const SizedBox(height: 18),
+
+                  PasswordField(
+                    controller: passwordController,
+                    errorText: passwordError,
+                  ),
+
+                  const SizedBox(height: 18),
+
+                  PasswordField(
+                    controller: confirmPasswordController,
+                    errorText: confirmPasswordError,
+                  ),
 
                   const SizedBox(height: 20),
 
-                  // =========================
                   // CONTINUE
-                  // =========================
-
                   LoginButton(
                     text: 'Continue',
                     onPressed: _continueSignup,
@@ -146,10 +171,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
                   const SizedBox(height: 24),
 
-                  // =========================
                   // LOGIN
-                  // =========================
-
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [

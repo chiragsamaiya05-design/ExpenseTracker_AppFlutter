@@ -1,3 +1,5 @@
+import 'package:bcrypt/bcrypt.dart';
+
 import '../database/user_database.dart';
 import '../models/user_model.dart';
 
@@ -7,6 +9,19 @@ class AuthRepository {
   AuthRepository({
     required this.database,
   });
+  String hashPassword(String password) {
+    return BCrypt.hashpw(
+      password,
+      BCrypt.gensalt(),
+    );
+  }
+
+  bool verifyPasswordHash(String password, String passwordHash,) {
+    return BCrypt.checkpw(
+      password,
+      passwordHash,
+    );
+  }
 
   Future<int> createUser(UserModel user) async {
     return await database.insertUser(user);
@@ -23,4 +38,5 @@ class AuthRepository {
   Future<UserModel?> getUserById(int id) async {
     return await database.getUserById(id);
   }
+
 }

@@ -122,10 +122,7 @@ class ExpensesDatabase {
   }
 
 
-  Future<int> insertBudget(
-      Budget budget,
-      int userId,
-      ) async {
+  Future<int> insertBudget(Budget budget, int userId,) async {
     final db = await database;
 
     final data = budget.toMap();

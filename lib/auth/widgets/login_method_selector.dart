@@ -14,7 +14,7 @@ class LoginMethodSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const primaryColor = Color(0xFF263AA5);
+    const primaryColor = Color(0xFF4F46A5);
 
     return Container(
       height: 46,

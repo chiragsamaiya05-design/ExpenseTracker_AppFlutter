@@ -64,7 +64,7 @@ class SocialLoginSection extends StatelessWidget {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF4285F4),
+                color: Color(0xFF4F46A5),
               ),
             ),
           ),

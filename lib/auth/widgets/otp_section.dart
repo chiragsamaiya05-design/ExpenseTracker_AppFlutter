@@ -88,7 +88,7 @@ class OtpSection extends StatelessWidget {
                 fontWeight: FontWeight.w500,
                 color: resendSeconds>0
                       ? Colors.grey
-                    : const Color(0xFF263AA5),
+                    : const Color(0xFF4F46A5),
               ),
             ),
           ),

@@ -17,6 +17,7 @@ class AuthController extends ChangeNotifier {
   UserModel? currentUser;
 
   String? pendingPhone;
+  String? pendingPassword;
 
   bool isLoading = false;
   bool isLoggedIn = false;
@@ -25,28 +26,28 @@ class AuthController extends ChangeNotifier {
 
   String? errorMessage;
 
-  // Temporary hardcoded OTP
+
   static const String hardcodedOtp = '123456';
 
-  void startLogin(String phone) {
+  void startLogin(String phone,) {
     pendingPhone = phone.trim();
+    pendingPassword = null;
     isSignupFlow = false;
     errorMessage = null;
 
     notifyListeners();
   }
 
-
-  // START SIGNUP
-  void startSignup(String phone) {
+  void startSignup(String phone,String password) {
     pendingPhone = phone.trim();
+    pendingPassword = password;
     isSignupFlow = true;
     errorMessage = null;
 
     notifyListeners();
   }
 
-  // Step 2: Verify OTP
+
   Future<bool> verifyOtp(String otp) async {
     errorMessage = null;
 
@@ -70,19 +71,23 @@ class AuthController extends ChangeNotifier {
       final existingUser =
       await repository.getUserByPhone(pendingPhone!);
 
-      // =========================
-      // SIGNUP FLOW
-      // =========================
 
+      // SIGNUP FLOW
       if (isSignupFlow) {
         if (existingUser != null) {
           errorMessage =
           'An account already exists with this number.';
           return false;
         }
+        if (pendingPassword == null || pendingPassword!.isEmpty) {
+          errorMessage = 'Password is required.';
+          return false;
+        }
+        final hashedPassword = repository.hashPassword(pendingPassword!);
 
         final newUser = UserModel(
           phone: phone,
+          passwordHash: hashedPassword,
           createdAt: DateTime.now(),
         );
 
@@ -91,40 +96,32 @@ class AuthController extends ChangeNotifier {
         currentUser = UserModel(
           id: userId,
           phone: newUser.phone,
+          passwordHash: newUser.passwordHash,
           createdAt: newUser.createdAt,
         );
 
         isLoggedIn = true;
-
-        if (userId != null) {
-          await session.saveUserId(userId);
-        }
-
+        await session.saveUserId(userId);
+        pendingPassword = null;
         return true;
       }
 
-      // =========================
-      // LOGIN FLOW
-      // =========================
 
+      // LOGIN FLOW
       if (existingUser == null) {
         errorMessage =
         'No account found with this number. Please sign up first.';
         return false;
       }
-
       currentUser = existingUser;
       isLoggedIn = true;
 
       if (existingUser.id != null) {
         await session.saveUserId(existingUser.id!);
       }
-
+      pendingPassword = null;
       return true;
-    } catch (e, stackTrace) {
-      debugPrint('AUTH ERROR: $e');
-      debugPrint('STACK TRACE: $stackTrace');
-
+    } catch (e) {
       errorMessage = 'Authentication failed. Please try again.';
       return false;
     } finally {
@@ -132,7 +129,7 @@ class AuthController extends ChangeNotifier {
       notifyListeners();
     }
   }
-  //check existing session
+
 
   Future<bool>restoreSession() async{
     isLoading = true;
@@ -180,19 +177,66 @@ class AuthController extends ChangeNotifier {
   }
 
 
-
-
-
   Future<void> logout() async {
     await session.clearSession();
 
     currentUser = null;
     pendingPhone = null;
+    pendingPassword = null;
+
     isLoggedIn = false;
     isSignupFlow = false;
+
     errorMessage = null;
 
     notifyListeners();
+  }
+
+  Future<bool> loginWithPassword(String phone, String password,) async {
+    isLoading = true;
+    errorMessage = null;
+    notifyListeners();
+
+    try {
+      final user = await repository.getUserByPhone(phone.trim());
+
+      if (user == null) {
+        errorMessage = 'No account found with this number.';
+        return false;
+      }
+
+      if (user.passwordHash == null || user.passwordHash!.isEmpty) {
+        errorMessage = 'This account does not have a password.';
+        return false;
+      }
+
+      final valid = await repository.verifyPasswordHash(
+        password,
+        user.passwordHash!,
+      );
+
+      if (!valid) {
+        errorMessage = 'Incorrect password.';
+        return false;
+      }
+
+      currentUser = user;
+      pendingPhone = user.phone;
+      pendingPassword = null;
+      isLoggedIn = true;
+
+      if (user.id != null) {
+        await session.saveUserId(user.id!);
+      }
+
+      return true;
+    } catch (e) {
+      errorMessage = 'Login failed. Please try again.';
+      return false;
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
   }
 
   void clearError() {

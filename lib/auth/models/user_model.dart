@@ -13,6 +13,7 @@ class UserModel {
   Map<String, dynamic> toMap() {
     return {
       'phone': phone,
+      'password': passwordHash,
       'created_at': createdAt.toIso8601String(),
     };
   }
@@ -21,7 +22,7 @@ class UserModel {
     return UserModel(
       id: map['id']as int?,
       phone: map['phone'] as String,
-
+      passwordHash: map['password'] as String?,
       createdAt: DateTime.parse(map['created_at']as String),
     );
   }

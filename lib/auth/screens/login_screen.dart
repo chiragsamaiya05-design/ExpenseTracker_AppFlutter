@@ -22,22 +22,13 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-
-
   bool isOtpSelected = true;
 
   String? phoneError;
   String? passwordError;
 
-
-
-  final TextEditingController phoneController =
-  TextEditingController();
-
-  final TextEditingController passwordController =
-  TextEditingController();
-
-
+  final TextEditingController phoneController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
 
   bool _validatePasswordLogin() {
     setState(() {
@@ -77,8 +68,6 @@ class _LoginScreenState extends State<LoginScreen> {
     return isValid;
   }
 
-
-
   bool _validatePhone() {
     final phone = phoneController.text.trim();
 
@@ -105,8 +94,6 @@ class _LoginScreenState extends State<LoginScreen> {
     return true;
   }
 
-
-
   void _sendOtp() {
     if (!_validatePhone()) {
       return;
@@ -127,6 +114,33 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+
+Future<void> _loginWithPassword() async {
+    if (!_validatePasswordLogin()) {
+      return;
+    }
+    final phone = phoneController.text.trim();
+    final password = passwordController.text;
+
+    final authController = context.read<AuthController>();
+
+    final success = await authController.loginWithPassword( phone, password, );
+
+    if (!mounted) {
+      return;
+    }
+    if (!success) {
+      final error = authController.errorMessage;
+      if (error != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text(error),
+            ),
+        );
+      }
+      return;
+    }
   }
 
 
@@ -164,13 +178,9 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-
-
                   const AuthHeader(),
 
                   const SizedBox(height: 30),
-
-
 
                   LoginMethodSelector(
                     isOtpSelected: isOtpSelected,
@@ -194,16 +204,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   const SizedBox(height: 22),
 
-
-
                   PhoneNumberField(
                     controller: phoneController,
                     errorText: phoneError,
                   ),
 
                   const SizedBox(height: 18),
-
-
 
                   if (!isOtpSelected) ...[
                     PasswordField(
@@ -225,18 +231,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     LoginButton(
                       text: 'Sign in',
-                      onPressed: () {
-                        if (_validatePasswordLogin()) {
-                          debugPrint(
-                            'Password validation successful',
-                          );
-                        }
-                      },
+                        onPressed: _loginWithPassword,
                     ),
                   ]
-
-
-
                   else ...[
                     LoginButton(
                       text: 'Send OTP',
@@ -245,8 +242,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ],
 
                   const SizedBox(height: 28),
-
-
 
                   SocialLoginSection(
                     onGooglePressed: () {
@@ -257,8 +252,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
 
                   const SizedBox(height: 24),
-
-
 
                   SignupPrompt(
                     onSignupPressed: () {

@@ -16,11 +16,13 @@ import '../../Screens/main_navigation_screen.dart';
 class OtpVerificationScreen extends StatefulWidget {
   final String phone;
   final bool isSignup;
+  final String? password;
 
   const OtpVerificationScreen({
     super.key,
     required this.phone,
     this.isSignup = false,
+    this.password,
   });
 
   @override
@@ -131,7 +133,14 @@ class _OtpVerificationScreenState
     final auth = context.read<AuthController>();
 
     if (widget.isSignup) {
-      auth.startSignup(widget.phone);
+      if (widget.password == null || widget.password!.isEmpty) {
+        return;
+      }
+
+      auth.startSignup(
+        widget.phone,
+        widget.password!,
+      );
     } else {
       auth.startLogin(widget.phone);
     }
