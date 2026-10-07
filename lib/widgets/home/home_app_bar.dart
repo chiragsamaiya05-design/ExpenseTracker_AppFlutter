@@ -1,68 +1,100 @@
 import 'package:flutter/material.dart';
 
-class HomeAppBar extends StatelessWidget
-    implements PreferredSizeWidget {
-  final bool isSearching;
+import '../../Screens/settings/settings_screen.dart';
 
-  final ValueChanged<String> onSearchChanged;
-  final VoidCallback onSearch;
-  final VoidCallback onCloseSearch;
-  final VoidCallback onLogout;
+class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final VoidCallback? onNotificationTap;
+  final VoidCallback? onSearchTap;
 
   const HomeAppBar({
     super.key,
-    required this.isSearching,
-    required this.onSearchChanged,
-    required this.onSearch,
-    required this.onCloseSearch,
-    required this.onLogout,
+    this.onNotificationTap,
+    this.onSearchTap,
   });
+
+  String _getGreeting() {
+    final hour = DateTime.now().hour;
+
+    if (hour < 12) {
+      return 'Good morning';
+    } else if (hour < 17) {
+      return 'Good afternoon';
+    } else {
+      return 'Good evening';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return AppBar(
-      title: isSearching
-          ? TextField(
-        autofocus: true,
-        onChanged: onSearchChanged,
-        decoration: const InputDecoration(
-          hintText: 'Search expenses...',
-          border: InputBorder.none,
-        ),
-      )
-          : const Text(
-        'Expense Tracker',
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      backgroundColor: colorScheme.primary,
+      foregroundColor: colorScheme.onPrimary,
+
+      titleSpacing: 16,
+
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            '${_getGreeting()} 👋',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: colorScheme.onPrimary.withValues(alpha: 0.85),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+
+          const SizedBox(height: 2),
+
+          Text(
+            'Expense Tracker',
+            style: theme.textTheme.titleLarge?.copyWith(
+              color: colorScheme.onPrimary,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
       ),
 
       actions: [
-        if (isSearching)
-          IconButton(
-            onPressed: onCloseSearch,
-            icon: const Icon(
-              Icons.close,
-            ),
-          )
-        else
-          IconButton(
-            onPressed: onSearch,
-            icon: const Icon(
-              Icons.search,
-            ),
-          ),
-
-        // Temporary logout button
         IconButton(
-          onPressed: onLogout,
-          tooltip: 'Logout',
+          onPressed: onSearchTap,
+          tooltip: 'Search',
           icon: const Icon(
-            Icons.logout_rounded,
+            Icons.search_rounded,
           ),
+        ),
+
+        IconButton(
+          onPressed: onNotificationTap,
+          tooltip: 'Notifications',
+          icon: const Icon(
+            Icons.notifications_none_rounded,
+          ),
+        ),
+
+        const SizedBox(width: 6),
+        IconButton(
+          icon: const Icon(Icons.settings_outlined),
+          tooltip: 'Settings',
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const SettingsScreen(),
+              ),
+            );
+          },
         ),
       ],
     );
   }
 
   @override
-  Size get preferredSize =>
-      const Size.fromHeight(kToolbarHeight);
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }

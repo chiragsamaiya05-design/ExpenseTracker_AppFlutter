@@ -1,9 +1,11 @@
+import 'package:expense_tracker/Screens/settings/settings_screen.dart';
 import 'package:flutter/material.dart';
 
 import 'home_screen.dart';
 import '../summary/summary_screen.dart';
 import '../summary/charts_screen.dart';
 import '../budget/budget_screen.dart';
+
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
@@ -23,6 +25,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     const SummaryScreen(),
     const ChartsScreen(),
     const BudgetScreen(),
+    const SettingsScreen(),
   ];
 
 

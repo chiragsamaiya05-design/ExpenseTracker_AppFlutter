@@ -1,141 +1,141 @@
 import 'package:flutter/material.dart';
 
 class DailyBudgetCard extends StatelessWidget {
+  final double dailyBudget;
+  final double remaining;
+  final bool isExceeded;
+  final VoidCallback? onEdit;
+
   const DailyBudgetCard({
     super.key,
     required this.dailyBudget,
     required this.remaining,
     required this.isExceeded,
-    required this.onEdit,
+    this.onEdit,
   });
-
-  final double dailyBudget;
-  final double remaining;
-  final bool isExceeded;
-  final VoidCallback onEdit;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final hasBudget = dailyBudget > 0;
+    final colorScheme = theme.colorScheme;
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onEdit,
-        borderRadius: BorderRadius.circular(18),
-        child: Container(
-          height: 136,
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 13,
-          ),
-          decoration: BoxDecoration(
-            color: const Color(0xFFE8E7FF),
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: const Color(0xFFD6D4FF),
-            ),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
+    final spent = dailyBudget - remaining;
+
+    final progress = dailyBudget <= 0
+        ? 0.0
+        : (spent / dailyBudget).clamp(0.0, 1.0);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: colorScheme.outlineVariant,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
-              // Header
-              const Text(
-                'Daily Budget',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF292747),
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: colorScheme.primaryContainer,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.track_changes_rounded,
+                  size: 20,
+                  color: colorScheme.primary,
                 ),
               ),
 
-              if (hasBudget) ...[
-                const SizedBox(height: 14),
+              const SizedBox(width: 12),
 
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Budget
-                    _BudgetValue(
-                      amount: dailyBudget,
-                      label: 'Budget',
-                    ),
-
-                    // Remaining
-                    _BudgetValue(
-                      amount: remaining.abs(),
-                      label: isExceeded
-                          ? 'Exceeded'
-                          : 'Remaining',
-                      isExceeded: isExceeded,
-                    ),
-                  ],
+              Expanded(
+                child: Text(
+                  'Daily Budget',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
-              ] else ...[
-                const SizedBox(height: 14),
+              ),
 
+              IconButton(
+                onPressed: onEdit,
+                tooltip: 'Edit budget',
+                visualDensity: VisualDensity.compact,
+                icon: Icon(
+                  Icons.edit_rounded,
+                  size: 19,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 14),
+
+          if (dailyBudget <= 0) ...[
+            Text(
+              'No daily budget set',
+              style: theme.textTheme.bodyLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Set a budget to track your spending today.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ] else ...[
+            Text(
+              '₹${remaining.toStringAsFixed(0)}',
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w800,
+                color: isExceeded
+                    ? colorScheme.error
+                    : colorScheme.primary,
+              ),
+            ),
+
+            const SizedBox(height: 2),
+
+            Text(
+              isExceeded
+                  ? 'Over budget today'
+                  : 'Remaining today',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+
+            const SizedBox(height: 14),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
                 Text(
-                  'No daily budget set',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: theme.colorScheme.onSurface.withOpacity(0.5),
+                  '₹${spent.clamp(0, double.infinity).toStringAsFixed(0)} spent',
+                  style: theme.textTheme.labelMedium,
+                ),
+                Text(
+                  '₹${dailyBudget.toStringAsFixed(0)} budget',
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],
-            ],
-          ),
-        ),
+            ),
+          ],
+        ],
       ),
-    );
-  }
-}
-
-class _BudgetValue extends StatelessWidget {
-  const _BudgetValue({
-    required this.amount,
-    required this.label,
-    this.isExceeded = false,
-  });
-
-  final double amount;
-  final String label;
-  final bool isExceeded;
-
-  @override
-  Widget build(BuildContext context) {
-    final amountColor = isExceeded
-        ? Colors.redAccent
-        : const Color(0xFF292747);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          '₹${amount.toStringAsFixed(0)}',
-          style: TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w700,
-            color: amountColor,
-            height: 1.0,
-          ),
-        ),
-
-        const SizedBox(height: 4),
-
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 11,
-            color: const Color(0xFF292747).withOpacity(0.5),
-            height: 1.0,
-          ),
-        ),
-      ],
     );
   }
 }
