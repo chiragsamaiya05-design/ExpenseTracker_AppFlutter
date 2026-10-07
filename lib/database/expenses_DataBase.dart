@@ -1,150 +1,274 @@
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
+import 'app_database.dart';
+
 import '../models/expense_model.dart';
 import 'package:expense_tracker/models/budget_model.dart';
 
+import '../models/monthly_finance_model.dart';
+
 class ExpensesDatabase {
-  static Database? _database;
+  final AppDatabase appDatabase;
+  ExpensesDatabase({
+    required this.appDatabase,
+  });
 
   Future<Database> get database async {
-    if (_database != null) {
-      return _database!;
-    }
-
-    _database = await openDatabase(
-      join(
-        await getDatabasesPath(),
-        'expenseDataBase.db',
-      ),
-      version: 3,
-      onCreate: (db, version) async {
-        await db.execute('''
-          CREATE TABLE expense(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT,
-            amount REAL,
-            category TEXT,
-            date TIMESTAMP
-          )
-        ''');
-        await db.execute('''
-    CREATE TABLE monthly_income(
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      month INTEGER,
-      year INTEGER,
-      income REAL,
-      UNIQUE(month,year)
-    )
-  ''');
-        await db.execute('''
-        CREATE TABLE budgets (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    category TEXT NOT NULL,
-    amount REAL NOT NULL,
-    month TEXT NOT NULL,
-    UNIQUE(category, month)
-)
-        ''');
-      },
-      onUpgrade: (db, oldVersion, newVersion) async {
-        if (oldVersion < 2) {
-          await db.execute('''
-      CREATE TABLE monthly_income(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        month INTEGER,
-        year INTEGER,
-        income REAL,
-        UNIQUE(month, year)
-      )
-    ''');
-        }
-        if(oldVersion<3){
-          await db.execute('''
-           CREATE TABLE budgets (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    category TEXT NOT NULL,
-    amount REAL NOT NULL,
-    month TEXT NOT NULL,
-    UNIQUE(category, month)
-)
-          ''');
-        }
-        },
-);
-
-    return _database!;
+    return await appDatabase.database;
   }
 
-  Future<int> insertExpense(Expense expense) async {
+  Future<int> insertExpense(Expense expense,int userId) async {
     final db = await database;
+
+    final data = expense.toMap();
+
+    data['user_id'] = userId;
 
     return await db.insert(
       'expense',
-      expense.toMap(),
+      data,
     );
   }
 
-  Future<List<Expense>> getExpense() async {
+  Future<List<Expense>> getExpense(int userId) async {
     final db = await database;
 
-    final maps = await db.query('expense',orderBy: 'date DESC');
+    final maps = await db.query('expense',where: 'user_id = ?',whereArgs: [userId], orderBy: 'date DESC');
 
     return maps.map((map) {
       return Expense.fromMap(map);
     }).toList();
   }
 
-  Future<int> updateExpense(Expense expense) async {
+  Future<int> updateExpense(Expense expense,int userId) async {
     final db = await database;
+
+    final data = expense.toMap();
+
+    data.remove('user_id');
 
     return await db.update(
       'expense',
-      expense.toMap(),
-      where: 'id = ?',
-      whereArgs: [expense.id],
+      data,
+      where: 'id = ? AND user_id =?',
+      whereArgs: [expense.id,userId],
     );
   }
 
-  Future<int> deleteExpense(int id) async {
+  Future<int> deleteExpense(int id,int userId) async {
     final db = await database;
 
     return await db.delete(
       'expense',
-      where: 'id = ?',
-      whereArgs: [id],
+      where: 'id = ? AND user_id =?',
+      whereArgs: [id , userId],
     );
   }
 
-  Future<void> saveMonthlyIncome(double income) async {
+  Future<int> saveMonthlyIncome(double income, int month, int year, int userId,) async {
     final db = await database;
 
-    final now = DateTime.now();
-
-    await db.insert(
+    return await db.insert(
       'monthly_income',
       {
-        'month': now.month,
-        'year': now.year,
+        'user_id': userId,
+        'month': month,
+        'year': year,
         'income': income,
       },
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
 
-  Future<double?> getMonthlyIncome() async {
+  Future<double> getMonthlyIncome(int month, int year, int userId,) async {
     final db = await database;
-
-    final now = DateTime.now();
 
     final result = await db.query(
       'monthly_income',
-      where: 'month = ? AND year = ?',
+      where: 'month = ? AND year = ? AND user_id = ?',
       whereArgs: [
-        now.month,
-        now.year,
+        month,
+        year,
+        userId,
       ],
       limit: 1,
+    );
+
+    if (result.isEmpty) {
+      return 0;
+    }
+
+    return (result.first['income'] as num).toDouble();
+  }
+
+  Future<Map<String, double>> getCategoryWiseExpense(int userId) async {
+    final db = await database;
+
+    final result = await db.rawQuery('''
+    SELECT category, SUM(amount) AS total
+    FROM expense
+    WHERE user_id = ?
+    GROUP BY category
+  ''',
+      [userId],
+    );
+
+    return {
+      for (final row in result)
+        row['category'] as String:
+        (row['total'] as num).toDouble(),
+    };
+  }
+
+
+  Future<int> insertBudget(Budget budget, int userId,) async {
+    final db = await database;
+
+    final data = budget.toMap();
+    data['user_id'] = userId;
+
+    return await db.insert(
+      'budgets',
+      data,
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<List<Budget>> getBudgets(String month,int userId) async {
+    final db = await database;
+
+    final result = await db.query(
+      'budgets',
+      where: 'month =? AND user_id = ?',
+      whereArgs: [month,userId],
+      orderBy: 'id DESC',
+    );
+
+    return result.map((map) => Budget.fromMap(map)).toList();
+  }
+
+  Future<int> updateBudget(Budget budget, int userId,) async {
+    final db = await database;
+
+    final data = budget.toMap();
+    data.remove('user_id');
+
+    return await db.update(
+      'budgets',
+      data,
+      where: 'id = ? AND user_id = ?',
+      whereArgs: [
+        budget.id,
+        userId,
+      ],
+    );
+  }
+
+  Future<int> deleteBudget(int id, int userId,) async {
+    final db = await database;
+
+    return await db.delete(
+      'budgets',
+      where: 'id = ? AND user_id = ?',
+      whereArgs: [
+        id,
+        userId,
+      ],
+    );
+  }
+
+  Future<double> getCategoryExpense(String category, String startDate, String endDate, int userId) async {
+    final db = await database;
+
+    final result = await db.rawQuery(
+      '''
+    SELECT SUM(amount) AS total
+    FROM expense
+    WHERE category = ?
+    AND date BETWEEN ? AND ?
+    AND user_id = ?
+    ''',
+      [category, startDate, endDate,userId],
+    );
+
+    return (result.first['total'] as num?)?.toDouble() ?? 0.0;
+  }
+
+  Future<Map<String, double>> getMonthlyCategoryExpenses(String startDate, String endDate,int userId) async {
+    final db = await database;
+
+    final result = await db.rawQuery(
+      '''
+    SELECT category, SUM(amount) AS total
+    FROM expense
+    WHERE date BETWEEN ? AND ?
+    AND user_id = ?
+    GROUP BY category
+    ''',
+      [startDate, endDate,userId],
+    );
+
+    return {
+      for (final row in result)
+        row['category'] as String:
+        (row['total'] as num).toDouble(),
+    };
+  }
+
+
+  Future<Budget?> getBudgetByCategory(String category, String month,int userId) async {
+    final db = await database;
+
+    final result = await db.query(
+      'budgets',
+      where: 'category = ? AND month = ? AND user_id = ?',
+      whereArgs: [category, month,userId],
+      limit: 1,
+    );
+
+    if (result.isEmpty) {
+      return null;
+    }
+
+    return Budget.fromMap(result.first);
+  }
+
+  Future<void> resetAllData(int userId) async {
+    final db = await database;
+
+    await db.delete(
+      'expense',
+      where: 'user_id = ?',
+      whereArgs: [userId],
+    );
+
+    await db.delete(
+      'monthly_income',
+      where: 'user_id = ?',
+      whereArgs: [userId],
+    );
+
+    await db.delete(
+      'budgets',
+      where: 'user_id = ?',
+      whereArgs: [userId],
+    );
+
+    await db.delete(
+      'monthly_finance',
+      where: 'user_id = ?',
+      whereArgs: [userId],
+    );
+  }
+
+  Future<double?> getIncomeForMonth(int month, int year,int userId) async {
+    final db = await database;
+
+    final result = await db.query(
+      'monthly_income',
+      where: 'month = ? AND year = ? AND user_id = ?',
+      whereArgs: [month, year,userId],
     );
 
     if (result.isEmpty) {
@@ -154,92 +278,59 @@ class ExpensesDatabase {
     return (result.first['income'] as num).toDouble();
   }
 
-  Future<Map<String, double>> getCategoryWiseExpense() async {
+  Future<int> saveMonthlyFinance(MonthlyFinance finance, int userId,) async {
     final db = await database;
 
-    final result = await db.rawQuery('''
-    SELECT category, SUM(amount) AS total
-    FROM expense
-    GROUP BY category
-  ''');
+    final data = finance.toMap();
 
-    return {
-      for (final row in result)
-        row['category'] as String:
-        (row['total'] as num).toDouble(),
-    };
-  }
-
-
-  Future<int> insertBudget(Budget budget) async {
-    final db = await database;
+    data['user_id'] = userId;
 
     return await db.insert(
-      'budgets',
-      budget.toMap(),
+      'monthly_finance',
+      data,
+      conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
 
-  Future<List<Budget>> getBudgets(String month) async {
+  Future<MonthlyFinance?> getMonthlyFinance(int month, int year, int userId,) async {
     final db = await database;
 
     final result = await db.query(
-      'budgets',
-      where: 'month = ?',
-      whereArgs: [month],
+      'monthly_finance',
+      where: 'month = ? AND year = ? AND user_id = ?',
+      whereArgs: [
+        month,
+        year,
+        userId,
+      ],
+      limit: 1,
     );
 
-    return result.map((map) => Budget.fromMap(map)).toList();
+    if (result.isEmpty) {
+      return null;
+    }
+
+    return MonthlyFinance.fromMap(result.first);
   }
 
-  Future<int> updateBudget(Budget budget) async {
-    final db = await database;
 
-    return await db.update(
-      'budgets',
-      budget.toMap(),
-      where: 'id = ?',
-      whereArgs: [budget.id],
-    );
-  }
-
-  Future<int> deleteBudget(int id) async {
-    final db = await database;
-
-    return await db.delete(
-      'budgets',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
-  }
-
-  Future<double> getCategoryExpense(String category, String startDate, String endDate,) async {
-    final db = await database;
-
-    final result = await db.rawQuery(
-      '''
-    SELECT SUM(amount) AS total
-    FROM expense
-    WHERE category = ?
-    AND date BETWEEN ? AND ?
-    ''',
-      [category, startDate, endDate],
-    );
-
-    return (result.first['total'] as num?)?.toDouble() ?? 0.0;
-  }
-
-  Future<Map<String, double>> getMonthlyCategoryExpenses(String startDate, String endDate,) async {
+  Future<Map<String, double>> getCategoryWiseExpenseForMonth({required int userId, required int month, required int year,}) async {
     final db = await database;
 
     final result = await db.rawQuery(
       '''
     SELECT category, SUM(amount) AS total
     FROM expense
-    WHERE date BETWEEN ? AND ?
+    WHERE user_id = ?
+    AND  strftime('%m', date) = ?
+      AND strftime('%Y', date) = ?
     GROUP BY category
     ''',
-      [startDate, endDate],
+      [
+        userId,
+        month.toString().padLeft(2, '0'),
+        year.toString(),
+      ],
     );
 
     return {
@@ -248,4 +339,98 @@ class ExpensesDatabase {
         (row['total'] as num).toDouble(),
     };
   }
+
+  Future<Map<int, double>> getDailyExpenseForMonth({required int month, required int year, required int userId,}) async {
+    final db = await database;
+
+    final result = await db.rawQuery(
+      '''
+    SELECT 
+      CAST(strftime('%d', date) AS INTEGER) AS day,
+      SUM(amount) AS total
+    FROM expense
+    WHERE user_id = ?
+    AND strftime('%m', date) = ?
+      AND strftime('%Y', date) = ?
+    GROUP BY strftime('%d', date)
+    ORDER BY day
+    ''',
+      [
+        userId,
+        month.toString().padLeft(2, '0'),
+        year.toString(),
+      ],
+    );
+
+    return {
+      for (final row in result)
+        row['day'] as int:
+        (row['total'] as num).toDouble(),
+    };
+  }
+
+  Future<int> updateMonthlyFinance(MonthlyFinance finance, int userId,) async {
+    final db = await database;
+
+    final data = finance.toMap();
+    data.remove('user_id');
+
+    return await db.update(
+      'monthly_finance',
+      data,
+      where: 'id = ? AND user_id = ?',
+      whereArgs: [
+        finance.id,
+        userId,
+      ],
+    );
+  }
+
+  Future<void> saveDailyBudget(String date, double amount, int userId,) async {
+    final db = await database;
+
+    await db.insert(
+      'daily_budget',
+      {
+        'user_id': userId,
+        'date': date,
+        'amount': amount,
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<double?> getDailyBudget(
+      String date,
+      int userId,
+      ) async {
+    final db = await database;
+
+    final result = await db.query(
+      'daily_budget',
+      where: 'user_id = ? AND date = ?',
+      whereArgs: [userId, date],
+      limit: 1,
+    );
+
+    if (result.isEmpty) {
+      return null;
+    }
+
+    return (result.first['amount'] as num).toDouble();
+  }
+
+  Future<int> deleteDailyBudget(
+      String date,
+      int userId,
+      ) async {
+    final db = await database;
+
+    return await db.delete(
+      'daily_budget',
+      where: 'user_id = ? AND date = ?',
+      whereArgs: [userId, date],
+    );
+  }
 }
+

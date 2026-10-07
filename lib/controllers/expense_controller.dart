@@ -1,150 +1,241 @@
 
+import 'package:expense_tracker/controllers/mixin/daily_budget_mixin.dart';
+import 'package:expense_tracker/controllers/mixin/expense_budget_mixin.dart';
+import 'package:expense_tracker/controllers/mixin/expense_carry_forward_mixin.dart';
+import 'package:expense_tracker/controllers/mixin/expense_crud_mixin.dart';
+import 'package:expense_tracker/controllers/mixin/expense_debt_mixin.dart';
+import 'package:expense_tracker/controllers/mixin/expense_filters_mixin.dart';
+import 'package:expense_tracker/controllers/mixin/expense_income_mixin.dart';
+import 'package:expense_tracker/controllers/mixin/expense_investment_mixin.dart';
+import 'package:expense_tracker/controllers/mixin/expense_monthly_finance_mixin.dart';
+import 'package:expense_tracker/controllers/mixin/expense_summary_mixin.dart';
+import 'package:expense_tracker/controllers/mixin/reset_mixin.dart';
+import 'package:expense_tracker/controllers/mixin/expense_budget_mixin.dart';
+import 'package:expense_tracker/controllers/mixin/daily_budget_mixin.dart';
+import 'package:expense_tracker/controllers/mixin/expense_quick_add_mixin.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
+import '../repositories/budget_repository.dart';
 import '../repositories/expense_repository.dart';
+import '../repositories/app_repository.dart';
+import '../repositories/finance_repository.dart';
+import '../repositories/income_repository.dart';
+import '../repositories/daily_budget_repository.dart';
 import '../models/expense_model.dart';
 
-class ExpenseController extends ChangeNotifier {
-  final ExpenseRepository repository;
-  ExpenseController({
-    required this.repository,
-  });
-  final List<Expense> expenses = [];
-  double monthlyIncome = 0;
-  String searchText = "";
-  String selectedSort = "Newest";
-  String selectedCategory = "All";
-  String selectedDate = "All";
+import '../models/monthly_finance_model.dart';
 
-  double get totalExpense {
-    return expenses.fold(
-      0,
+class ExpenseController extends ChangeNotifier
+with ExpenseCrudMixin,
+      ExpenseFiltersMixin,
+      ExpenseIncomeMixin,
+      ExpenseSummaryMixin,
+      ExpenseCarryForwardMixin,
+      ExpenseDebtMixin,
+      ExpenseMonthlyFinanceMixin,
+      ExpenseInvestmentMixin,
+      ExpenseBudgetMixin,
+      DailyBudgetMixin,
+      ExpenseQuickAddMixin,
+    ResetMixin {
+  final ExpenseRepository expenseRepository;
+  final IncomeRepository incomeRepository;
+  final FinanceRepository financeRepository;
+  final AppRepository appRepository;
+
+
+  ExpenseController({
+    required this.expenseRepository,
+    required this.incomeRepository,
+    required this.financeRepository,
+    required this.appRepository,
+    required BudgetRepository budgetRepository,
+    required DailyBudgetRepository dailyBudgetRepository,
+  }){
+    initializeBudgetRepository(budgetRepository);
+    initializeDailyBudgetRepository(dailyBudgetRepository);
+    _initialize();
+  }
+  MonthlyFinance? currentMonthlyFinance;
+
+  final List<Expense> expenses = [];
+  Map<int, double> dailyExpenses = {};
+  double carryForward = 0;
+  double debt = 0;
+  double investment = 0;
+  double availableFunds = 0;
+
+  double pendingSettlementAmount = 0;
+  bool pendingSettlementIsDebt = false;
+
+  bool settlementRequired = false;
+  bool settlementShown = false;
+
+  Map<String, double> categoryExpenses = {};
+
+
+  Future<void> _initialize() async {
+    isLoading = true;
+    notifyListeners();
+
+    await loadExpenses();
+    await loadIncome();
+    await loadMonthlySummaries();
+    await loadCurrentMonthBudget();
+    await loadDailyBudget();
+
+
+    await loadMonthlyFinance();
+    await initializeCurrentMonth();
+    await checkMonthlySettlement();
+
+    isLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> initializeCurrentMonth() async {
+    final now = DateTime.now();
+    final income =
+        await incomeRepository.getMonthlyIncome(now.month,now.year) ?? 0;
+
+    monthlyIncome = income;
+
+    final previousCarryForward =
+    await getPreviousCarryForward();
+
+    final previousDebt =
+    await getPreviousDebt();
+
+    carryForward = previousCarryForward;
+    debt = previousDebt;
+
+    availableFunds =
+        monthlyIncome + carryForward - debt;
+
+    notifyListeners();
+  }
+
+  Future<void> loadCategoryExpenses() async {
+    categoryExpenses = await expenseRepository.getCategoryExpenses();
+
+    notifyListeners();
+  }
+
+  Future<void> loadChartCategoryExpenses({required int month, required int year,}) async {
+    categoryExpenses =
+    await expenseRepository.getCategoryWiseExpenseForMonth(
+      month: month,
+      year: year,
+    );
+
+
+
+    notifyListeners();
+  }
+
+  Future<void> loadMonthlyFinance() async {
+    final finance = await financeRepository.getMonthlyFinance(
+      DateTime.now().month,
+      DateTime.now().year,
+    );
+
+    if (finance == null) {
+      carryForward = 0;
+      debt = 0;
+      investment = 0;
+      availableFunds = monthlyIncome;
+      return;
+    }
+
+    carryForward = finance.carryForward;
+    debt = finance.debt;
+    investment = finance.investment;
+
+    notifyListeners();
+  }
+
+  Future<void> loadDailyChartExpenses({required int month, required int year,}) async {
+    dailyExpenses =
+    await expenseRepository.getDailyExpenseForMonth(
+      month: month,
+      year: year,
+    );
+    notifyListeners();
+  }
+
+
+  Future<void> checkMonthlySettlement() async {
+    final now = DateTime.now();
+
+    final previousMonth = DateTime(
+      now.year,
+      now.month - 1,
+    );
+
+    final previousFinance =
+    await financeRepository.getMonthlyFinance(
+      previousMonth.month,
+      previousMonth.year,
+    );
+
+    // No previous month record
+    if (previousFinance == null) {
+      pendingSettlementAmount = 0;
+      pendingSettlementIsDebt = false;
+      settlementRequired = false;
+
+      notifyListeners();
+      return;
+    }
+
+    // Previous month has an unresolved surplus
+    if (previousFinance.remaining > 0 &&
+        previousFinance.decision == null) {
+      pendingSettlementAmount =
+          previousFinance.remaining;
+
+      pendingSettlementIsDebt = false;
+      settlementRequired = true;
+
+      notifyListeners();
+      return;
+    }
+
+    // Previous month has an unresolved debt
+    if (previousFinance.debt > 0 &&
+        previousFinance.decision == null) {
+      pendingSettlementAmount =
+          previousFinance.debt;
+
+      pendingSettlementIsDebt = true;
+      settlementRequired = true;
+
+      notifyListeners();
+      return;
+    }
+
+    // Nothing is waiting for a decision
+    pendingSettlementAmount = 0;
+    pendingSettlementIsDebt = false;
+    settlementRequired = false;
+
+    notifyListeners();
+  }
+
+
+  double getSpentForCategory(String category) {
+    final now = DateTime.now();
+
+    return expenses
+        .where((expense) =>
+    expense.category == category &&
+        expense.date.year == now.year &&
+        expense.date.month == now.month)
+        .fold(
+      0.0,
           (sum, expense) => sum + expense.amount,
     );
   }
 
-  double get totalBalance {
-    return monthlyIncome - totalExpense;
-  }
-
-  void setCategory(String category) {
-    selectedCategory = category;
-    notifyListeners();
-  }
-
-  Future<void> loadExpenses() async {
-    final data = await repository.getExpenses();
-
-    expenses.clear();
-    expenses.addAll(data);
-
-    notifyListeners();
-  }
-
-  Future<void> loadIncome() async {
-    final income = await repository.getMonthlyIncome();
-
-    monthlyIncome = income ?? 0;
-
-    notifyListeners();
-  }
-
-  Future<void> saveIncome(double income) async {
-    await repository.saveMonthlyIncome(income);
-
-    monthlyIncome = income;
-
-    notifyListeners();
-  }
-
-  Future<void> addExpense(Expense expense) async {
-    await repository.addExpense(expense);
-
-    await loadExpenses();
-  }
-
-  Future<void> updateExpense(Expense expense) async {
-    await repository.updateExpense(expense);
-
-    await loadExpenses();
-  }
-
-  Future<void> deleteExpense(int id) async {
-    
-    await repository.deleteExpense(id);
-    await loadExpenses();
-  }
-  List<Expense> get displayExpenses {
-    final result = expenses.where((expense) {
-      return expense.title
-          .toLowerCase()
-          .contains(searchText.toLowerCase());
-    }).toList();
-
-    if (selectedSort == "Newest") {
-      result.sort((a, b) => b.date.compareTo(a.date));
-    } else if (selectedSort == "Oldest") {
-      result.sort((a, b) => a.date.compareTo(b.date));
-    } else if (selectedSort == "Highest") {
-      result.sort((a, b) => b.amount.compareTo(a.amount));
-    } else if (selectedSort == "Lowest") {
-      result.sort((a, b) => a.amount.compareTo(b.amount));
-    }
-
-    return result;
-  }
-  Map<String, double> categoryExpenses = {};
-
-  Future<void> loadCategoryExpenses() async {
-    categoryExpenses = await repository.getCategoryExpenses();
-
-    notifyListeners();
-  }
-
-
-  List<Expense> get allFilteredExpenses {
-    List<Expense> result = List.from(expenses);
-
-    // Category
-    if (selectedCategory != "All") {
-      result = result.where((expense) {
-        return expense.category == selectedCategory;
-      }).toList();
-    }
-
-    // Date
-    final now = DateTime.now();
-
-    if (selectedDate == "Today") {
-      result = result.where((expense) {
-        return expense.date.year == now.year &&
-            expense.date.month == now.month &&
-            expense.date.day == now.day;
-      }).toList();
-    }
-
-    if (selectedDate == "Month") {
-      result = result.where((expense) {
-        return expense.date.year == now.year &&
-            expense.date.month == now.month;
-      }).toList();
-    }
-
-    // Sort
-    if (selectedSort == "Newest") {
-      result.sort((a, b) => b.date.compareTo(a.date));
-    } else if (selectedSort == "Oldest") {
-      result.sort((a, b) => a.date.compareTo(b.date));
-    } else if (selectedSort == "Low") {
-      result.sort((a, b) => a.amount.compareTo(b.amount));
-    } else if (selectedSort == "High") {
-      result.sort((a, b) => b.amount.compareTo(a.amount));
-    }
-
-    return result;
-  }
-  void setSearchText(String value) {
-    searchText = value;
-    notifyListeners();
-  }
 }

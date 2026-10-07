@@ -28,4 +28,6 @@ class Budget {
       month: map['month'] as String,
     );
   }
+
+
 }
