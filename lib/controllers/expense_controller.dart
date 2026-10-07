@@ -12,6 +12,7 @@ import 'package:expense_tracker/controllers/mixin/expense_summary_mixin.dart';
 import 'package:expense_tracker/controllers/mixin/reset_mixin.dart';
 import 'package:expense_tracker/controllers/mixin/expense_budget_mixin.dart';
 import 'package:expense_tracker/controllers/mixin/daily_budget_mixin.dart';
+import 'package:expense_tracker/controllers/mixin/expense_quick_add_mixin.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -36,6 +37,7 @@ with ExpenseCrudMixin,
       ExpenseInvestmentMixin,
       ExpenseBudgetMixin,
       DailyBudgetMixin,
+      ExpenseQuickAddMixin,
     ResetMixin {
   final ExpenseRepository expenseRepository;
   final IncomeRepository incomeRepository;

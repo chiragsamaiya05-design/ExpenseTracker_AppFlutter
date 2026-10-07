@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../constants/add_color.dart';
+import '../../constants/add_color.dart';
 
 class BudgetCard extends StatelessWidget {
   final String category;

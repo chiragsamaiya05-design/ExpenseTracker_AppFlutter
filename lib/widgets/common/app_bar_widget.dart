@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../constants/add_color.dart';
+import '../../constants/add_color.dart';
 
 
 class AppBarWidget extends StatelessWidget

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../constants/add_color.dart';
-import '../models/expense_model.dart';
+import '../../constants/add_color.dart';
+import '../../models/expense_model.dart';
 
 
 class EditExpenseScreen extends StatefulWidget {

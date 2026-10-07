@@ -58,4 +58,18 @@ class DatabaseTables {
       UNIQUE(user_id, date)
     )
   ''';
+  static const String recurringExpenses = '''
+    CREATE TABLE recurring_expenses (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          title TEXT NOT NULL,
+          amount REAL NOT NULL,
+          category TEXT NOT NULL,
+          frequency TEXT NOT NULL,
+          start_date TEXT NOT NULL,
+          next_due_date TEXT NOT NULL,
+          end_date TEXT,
+          is_active INTEGER NOT NULL DEFAULT 1,
+          created_at TEXT NOT NULL
+)
+  ''';
 }

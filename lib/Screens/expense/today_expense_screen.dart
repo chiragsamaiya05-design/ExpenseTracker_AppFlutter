@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../controllers/expense_controller.dart';
-import '../widgets/expense_list_item.dart';
-import '../widgets/app_bar_widget.dart';
+import '../../controllers/expense_controller.dart';
+import '../../widgets/expense/expense_list_item.dart';
+import '../../widgets/common/app_bar_widget.dart';
 
 class TodayExpensesScreen extends StatelessWidget {
   const TodayExpensesScreen({super.key});

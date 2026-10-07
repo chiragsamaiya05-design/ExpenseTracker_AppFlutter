@@ -98,6 +98,19 @@ class UserDatabase {
 
     return UserModel.fromMap(result.first);
   }
+
+  Future<int> updatePassword(int userId,String passwordHash)async{
+    final db = await database;
+
+    return await db.update('users',
+        {
+          'password_hash':passwordHash,
+        },
+      where: 'id = ?',
+      whereArgs: [userId],
+    );
+  }
+
   Future<void> deleteDatabase() async {
     final dbPath = await getDatabasesPath();
 
@@ -112,6 +125,7 @@ class UserDatabase {
 
     debugPrint('User database deleted.');
   }
+
   Future<void> resetDatabase() async {
     final dbPath = await getDatabasesPath();
 
@@ -129,4 +143,6 @@ class UserDatabase {
 
     debugPrint('USER DATABASE RESET: $path');
   }
+
+
 }

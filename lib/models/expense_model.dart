@@ -8,7 +8,7 @@ class Expense {
 
 
   const Expense({
-    required this.id,
+    this.id,
     required this.title,
     required this.amount,
     required this.category,
@@ -17,7 +17,7 @@ class Expense {
 
   Map<String,dynamic>toMap(){
     return{
-      'id': id,
+      if(id!= null)'id': id,
       'title':title,
       'amount': amount,
       'category': category,
@@ -26,7 +26,7 @@ class Expense {
   }
   factory Expense.fromMap(Map<String, dynamic> map) {
     return Expense(
-      id: map['id']as int,
+      id: map['id']as int?,
       title: map['title'] as String,
       amount: (map['amount'] as num).toDouble(),
       category: map['category'] as String,

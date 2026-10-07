@@ -20,113 +20,121 @@ class TodayBudgetCard extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(18),
+      height: 112,
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [
             Color(0xFF6557D9),
-            Color(0xFF8B7CF6),
+            Color(0xFF8174EC),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF6557D9).withOpacity(0.20),
-            blurRadius: 14,
-            offset: const Offset(0, 6),
+            color: const Color(0xFF6557D9).withOpacity(0.16),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Header
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(9),
+                width: 34,
+                height: 34,
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.16),
-                  borderRadius: BorderRadius.circular(11),
+                  borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(
                   Icons.today_rounded,
                   color: Colors.white,
-                  size: 20,
+                  size: 16,
                 ),
               ),
 
-              const SizedBox(width: 11),
+              const SizedBox(width: 8),
 
               const Expanded(
                 child: Text(
                   "Today's Budget",
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 15,
+                    fontSize: 12,
                     fontWeight: FontWeight.w700,
+                    color: Colors.white,
                   ),
                 ),
               ),
 
-              IconButton(
-                onPressed: onEdit,
-                icon: Icon(
-                  hasBudget
-                      ? Icons.edit_rounded
-                      : Icons.add_rounded,
-                  color: Colors.white,
-                  size: 20,
+              SizedBox(
+                width: 26,
+                height: 26,
+                child: IconButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: onEdit,
+                  icon: Icon(
+                    hasBudget
+                        ? Icons.edit_rounded
+                        : Icons.add_rounded,
+                    size: 15,
+                    color: Colors.white,
+                  ),
                 ),
-                tooltip: hasBudget
-                    ? 'Edit Budget'
-                    : 'Set Budget',
               ),
             ],
           ),
 
-          const SizedBox(height: 20),
+          const Spacer(),
 
+          // Amount
           if (hasBudget) ...[
             Text(
               '₹${budget.toStringAsFixed(0)}',
               style: const TextStyle(
-                color: Colors.white,
-                fontSize: 30,
+                fontSize: 20,
                 fontWeight: FontWeight.w800,
+                color: Colors.white,
               ),
             ),
 
-            const SizedBox(height: 4),
+            const SizedBox(height: 2),
 
             Text(
               isExceeded
                   ? '₹${remaining.abs().toStringAsFixed(0)} over budget'
                   : '₹${remaining.toStringAsFixed(0)} remaining',
               style: TextStyle(
-                color: Colors.white.withOpacity(0.85),
-                fontSize: 13,
+                fontSize: 10,
                 fontWeight: FontWeight.w500,
+                color: Colors.white.withOpacity(0.78),
               ),
             ),
           ] else ...[
-            Text(
+            const Text(
               'No budget set',
               style: TextStyle(
-                color: Colors.white.withOpacity(0.9),
-                fontSize: 18,
+                fontSize: 15,
                 fontWeight: FontWeight.w700,
+                color: Colors.white,
               ),
             ),
 
-            const SizedBox(height: 4),
+            const SizedBox(height: 2),
 
             Text(
-              'Set a spending limit for today',
+              'Set a limit for today',
               style: TextStyle(
-                color: Colors.white.withOpacity(0.75),
-                fontSize: 13,
+                fontSize: 10,
+                color: Colors.white.withOpacity(0.78),
               ),
             ),
           ],

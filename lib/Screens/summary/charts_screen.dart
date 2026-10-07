@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../controllers/expense_controller.dart';
-import '../widgets/app_bar_widget.dart';
-import '../widgets/category_expense_pie_chart.dart';
-import '../widgets/daily_expense_line_chart.dart';
+import '../../controllers/expense_controller.dart';
+import '../../widgets/common/app_bar_widget.dart';
+import '../../widgets/charts/category_expense_pie_chart.dart';
+import '../../widgets/charts/daily_expense_line_chart.dart';
 
 class ChartsScreen extends StatefulWidget {
   const ChartsScreen({super.key});

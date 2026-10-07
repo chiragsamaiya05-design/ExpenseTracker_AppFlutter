@@ -121,10 +121,15 @@ class AuthController extends ChangeNotifier {
       }
       pendingPassword = null;
       return true;
-    } catch (e) {
-      errorMessage = 'Authentication failed. Please try again.';
-      return false;
-    } finally {
+    }  catch (e, stackTrace) {
+  debugPrint('========== SIGNUP ERROR ==========');
+  debugPrint('ERROR: $e');
+  debugPrint('STACK TRACE: $stackTrace');
+  debugPrint('===================================');
+
+  errorMessage = 'Authentication failed. Please try again.';
+  return false;
+} finally {
       isLoading = false;
       notifyListeners();
     }
@@ -237,6 +242,63 @@ class AuthController extends ChangeNotifier {
       isLoading = false;
       notifyListeners();
     }
+  }
+
+  Future<bool>setPassword(String password)async{
+    errorMessage = null;
+
+    if(currentUser == null|| currentUser!.id == null){
+      errorMessage = 'User session not found.';
+      notifyListeners();
+      return false;
+    }
+    if(password.length<8){
+      errorMessage= 'Password must be at least 8 characters.';
+      notifyListeners();
+      return false;
+    }
+    isLoading = true;
+    notifyListeners();
+
+    try{
+      final hashedPassword = repository.hashPassword(password);
+
+      final updateRows = await repository.updatePassword(currentUser!.id!, hashedPassword);
+
+      if(updateRows == 0){
+        errorMessage = 'Unable to set password.';
+        return false;
+      }
+      currentUser = UserModel(
+        id: currentUser!.id,
+        phone: currentUser!.phone,
+        passwordHash: hashedPassword,
+        createdAt: currentUser!.createdAt,
+      );
+      return true;
+
+    }catch(e){
+      debugPrint('SET PASSWORD ERROR: $e');
+      errorMessage = 'Unable to set password. Please try again.';
+      return false;
+    }finally{
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> resetAuthenticationData() async {
+    await repository.resetDatabase();
+    await session.clearSession();
+
+    currentUser = null;
+    pendingPhone = null;
+    pendingPassword = null;
+    isLoggedIn = false;
+    isSignupFlow = false;
+    errorMessage = null;
+
+    notifyListeners();
   }
 
   void clearError() {

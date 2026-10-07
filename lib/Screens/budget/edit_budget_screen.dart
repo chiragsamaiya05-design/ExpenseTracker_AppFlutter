@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../constants/add_color.dart';
-import '../controllers/budget_controller.dart';
-import '../models/budget_model.dart';
+import '../../constants/add_color.dart';
+import '../../controllers/budget_controller.dart';
+import '../../models/budget_model.dart';
 
 class EditBudgetScreen extends StatefulWidget {
   final Budget budget;

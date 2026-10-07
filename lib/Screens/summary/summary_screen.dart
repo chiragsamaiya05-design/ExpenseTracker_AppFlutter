@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 
-import '../controllers/expense_controller.dart';
-import '../widgets/app_bar_widget.dart';
-import '../widgets/monthly_summary_card.dart';
+import '../../controllers/expense_controller.dart';
+import '../../widgets/common/app_bar_widget.dart';
+import '../../widgets/summary/monthly_summary_card.dart';
 
 class SummaryScreen extends StatelessWidget {
   const SummaryScreen({super.key});

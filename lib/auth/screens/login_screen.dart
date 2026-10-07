@@ -13,6 +13,7 @@ import '../widgets/social_login_section.dart';
 
 import 'otp_verification_screen.dart';
 import 'signup_screen.dart';
+import '../../Screens/home/main_navigation_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -141,6 +142,12 @@ Future<void> _loginWithPassword() async {
       }
       return;
     }
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const MainNavigationScreen(),
+      ),
+    );
   }
 
 
@@ -264,6 +271,22 @@ Future<void> _loginWithPassword() async {
                       );
                     },
                   ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      await context
+                          .read<AuthController>()
+                          .resetAuthenticationData();
+
+                      if (!context.mounted) return;
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Authentication database reset'),
+                        ),
+                      );
+                    },
+                    child: const Text('Reset Authentication Data'),
+                  )
                 ],
               ),
             ),

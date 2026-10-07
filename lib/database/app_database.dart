@@ -16,13 +16,14 @@ class AppDatabase {
         await getDatabasesPath(),
         'expenseDataBase.db',
       ),
-      version: 7,
+      version: 8,
       onCreate: (db, version) async {
         await db.execute(DatabaseTables.expense);
         await db.execute(DatabaseTables.monthlyIncome);
         await db.execute(DatabaseTables.budgets);
         await db.execute(DatabaseTables.monthlyFinance);
         await db.execute(DatabaseTables.dailyBudget);
+        await db.execute(DatabaseTables.recurringExpenses);
       },
       onUpgrade: (db, oldVersion, newVersion) async {
         await DatabaseMigrations.upgrade(

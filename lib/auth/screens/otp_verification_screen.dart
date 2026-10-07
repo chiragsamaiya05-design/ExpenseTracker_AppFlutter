@@ -11,7 +11,7 @@ import '../widgets/otp_section.dart';
 import 'auth_gate.dart';
 import 'login_screen.dart';
 import 'signup_screen.dart';
-import '../../Screens/main_navigation_screen.dart';
+import '../../Screens/home/main_navigation_screen.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
   final String phone;

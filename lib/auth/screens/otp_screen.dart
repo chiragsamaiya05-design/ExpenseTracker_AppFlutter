@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../controllers/auth_controller.dart';
-import '../../Screens/main_navigation_screen.dart';
+import '../../Screens/home/main_navigation_screen.dart';
 
 class OtpScreen extends StatefulWidget {
   const OtpScreen({super.key});

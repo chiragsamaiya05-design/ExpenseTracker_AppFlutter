@@ -15,8 +15,8 @@ class TodaySpendingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(18),
+      height: 112,
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [
@@ -26,9 +26,9 @@ class TodaySpendingCard extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFFBFE8D0),
+          color: const Color(0xFFD4EDE0),
         ),
       ),
       child: Column(
@@ -37,25 +37,29 @@ class TodaySpendingCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(9),
+                width: 30,
+                height: 30,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF26B99A).withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(11),
+                  color: const Color(0xFF26B99A)
+                      .withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(9),
                 ),
                 child: const Icon(
                   Icons.payments_rounded,
-                  size: 20,
                   color: Color(0xFF26B99A),
+                  size: 16,
                 ),
               ),
 
-              const SizedBox(width: 11),
+              const SizedBox(width: 8),
 
               const Expanded(
                 child: Text(
                   "Today's Spending",
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: 12,
                     fontWeight: FontWeight.w700,
                     color: Color(0xFF292747),
                   ),
@@ -63,65 +67,53 @@ class TodaySpendingCard extends StatelessWidget {
               ),
 
               Text(
-                '$expenseCount ${expenseCount == 1 ? 'expense' : 'expenses'}',
-                style: TextStyle(
+                '$expenseCount',
+                style: const TextStyle(
                   fontSize: 11,
-                  color: Colors.grey.shade600,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF26B99A),
                 ),
               ),
             ],
           ),
 
-          const SizedBox(height: 18),
+          const Spacer(),
 
           Text(
             '₹${totalSpent.toStringAsFixed(0)}',
             style: const TextStyle(
-              fontSize: 28,
+              fontSize: 20,
               fontWeight: FontWeight.w800,
               color: Color(0xFF292747),
             ),
           ),
 
-          const SizedBox(height: 4),
-
-          Text(
-            'Total spent today',
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey.shade600,
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
-          SizedBox(
-            width: double.infinity,
-            height: 42,
-            child: OutlinedButton.icon(
-              onPressed: onViewExpenses,
-              icon: const Icon(
-                Icons.receipt_long_rounded,
-                size: 17,
-              ),
-              label: const Text(
-                "View Today's Expenses",
+          Row(
+            children: [
+              Text(
+                expenseCount == 1
+                    ? '1 transaction'
+                    : '$expenseCount transactions',
                 style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
+                  fontSize: 10,
+                  color: Colors.grey.shade600,
                 ),
               ),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFF26B99A),
-                side: const BorderSide(
-                  color: Color(0xFF26B99A),
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+
+              const Spacer(),
+
+              GestureDetector(
+                onTap: onViewExpenses,
+                child: const Text(
+                  'View',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF26B99A),
+                  ),
                 ),
               ),
-            ),
+            ],
           ),
         ],
       ),

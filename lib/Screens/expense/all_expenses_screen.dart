@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../controllers/expense_controller.dart';
-import '../widgets/expense_list_item.dart';
-import '../widgets/expense_filter_bottom_sheet.dart';
-import '../utils/confirmation_dailog.dart';
+import '../../controllers/expense_controller.dart';
+import '../../widgets/expense/expense_list_item.dart';
+import '../../widgets/expense/expense_filter_bottom_sheet.dart';
+import '../../utils/confirmation_dailog.dart';
 import 'edit_expense_screen.dart';
 
 

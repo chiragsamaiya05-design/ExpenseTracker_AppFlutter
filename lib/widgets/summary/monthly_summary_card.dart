@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/monthly_summary_model.dart';
+import '../../models/monthly_summary_model.dart';
 
 class MonthlySummaryCard extends StatelessWidget {
   final MonthlySummary summary;

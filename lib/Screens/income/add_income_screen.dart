@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../constants/add_color.dart';
+import '../../constants/add_color.dart';
 
-import '../controllers/expense_controller.dart';
+import '../../controllers/expense_controller.dart';
 
 class AddIncomeScreen extends StatefulWidget {
   final ExpenseController controller;

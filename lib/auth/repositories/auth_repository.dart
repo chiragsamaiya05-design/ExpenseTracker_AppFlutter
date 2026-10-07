@@ -39,4 +39,11 @@ class AuthRepository {
     return await database.getUserById(id);
   }
 
+  Future<int> updatePassword(int userId, String passwordHash,) async {
+    return await database.updatePassword(userId, passwordHash,);
+  }
+
+  Future<void> resetDatabase() async {
+    await database.resetDatabase();
+  }
 }
