@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class DailyBudgetCard extends StatelessWidget {
@@ -18,22 +19,39 @@ class DailyBudgetCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
 
     final spent = dailyBudget - remaining;
 
-    final progress = dailyBudget <= 0
-        ? 0.0
-        : (spent / dailyBudget).clamp(0.0, 1.0);
+    final statusColor = isExceeded
+        ? colorScheme.error
+        : colorScheme.primary;
+
+    // Theme-aware card styling.
+    final cardColor = colorScheme.surface;
+
+    final borderColor = colorScheme.outlineVariant.withValues(
+      alpha: isDark ? 0.65 : 0.8,
+    );
 
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: colorScheme.surface,
+        color: cardColor,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: colorScheme.outlineVariant,
+          color: borderColor,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(
+              alpha: isDark?0.12:0.035,
+            ),
+            blurRadius: 12,
+            offset:  const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -61,6 +79,7 @@ class DailyBudgetCard extends StatelessWidget {
                   'Daily Budget',
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
+                    color: colorScheme.onSurface,
                   ),
                 ),
               ),
@@ -85,6 +104,7 @@ class DailyBudgetCard extends StatelessWidget {
               'No daily budget set',
               style: theme.textTheme.bodyLarge?.copyWith(
                 fontWeight: FontWeight.w600,
+                color: colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 4),
@@ -99,9 +119,7 @@ class DailyBudgetCard extends StatelessWidget {
               '₹${remaining.toStringAsFixed(0)}',
               style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.w800,
-                color: isExceeded
-                    ? colorScheme.error
-                    : colorScheme.primary,
+                color: statusColor,
               ),
             ),
 
@@ -112,7 +130,12 @@ class DailyBudgetCard extends StatelessWidget {
                   ? 'Over budget today'
                   : 'Remaining today',
               style: theme.textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSurfaceVariant,
+                color: isExceeded
+                    ? colorScheme.error
+                    : colorScheme.onSurfaceVariant,
+                fontWeight: isExceeded
+                    ? FontWeight.w600
+                    : FontWeight.normal,
               ),
             ),
 
@@ -121,14 +144,28 @@ class DailyBudgetCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  '₹${spent.clamp(0, double.infinity).toStringAsFixed(0)} spent',
-                  style: theme.textTheme.labelMedium,
+                Flexible(
+                  child: Text(
+                    '₹${spent.clamp(0, double.infinity).toStringAsFixed(0)} spent',
+                    style: theme.textTheme.labelMedium?.copyWith(
+                    color: isExceeded
+                        ? colorScheme.error
+                        : colorScheme.onSurfaceVariant,
+                    fontWeight: isExceeded
+                        ? FontWeight.w600
+                        : FontWeight.normal,
+                    ),
+                  ),
                 ),
-                Text(
-                  '₹${dailyBudget.toStringAsFixed(0)} budget',
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
+
+                const SizedBox(width: 8,),
+
+                Flexible(
+                  child: Text(
+                    '₹${dailyBudget.toStringAsFixed(0)} budget',
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ),
               ],

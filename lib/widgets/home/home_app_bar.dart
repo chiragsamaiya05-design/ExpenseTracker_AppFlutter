@@ -28,13 +28,14 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
 
     return AppBar(
       elevation: 0,
       scrolledUnderElevation: 0,
-      backgroundColor: colorScheme.primary,
-      foregroundColor: colorScheme.onPrimary,
-
+      backgroundColor: theme.scaffoldBackgroundColor,
+      foregroundColor: colorScheme.onSurface,
+      surfaceTintColor: Colors.transparent,
       titleSpacing: 16,
 
       title: Column(
@@ -44,44 +45,40 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
           Text(
             '${_getGreeting()} 👋',
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onPrimary.withValues(alpha: 0.85),
+              color: colorScheme.onSurfaceVariant,
               fontWeight: FontWeight.w500,
             ),
           ),
-
           const SizedBox(height: 2),
-
           Text(
             'Expense Tracker',
             style: theme.textTheme.titleLarge?.copyWith(
-              color: colorScheme.onPrimary,
+              color: colorScheme.onSurface,
               fontWeight: FontWeight.w700,
             ),
           ),
         ],
       ),
 
+      iconTheme: IconThemeData(
+        color: colorScheme.onSurface,
+        size: 23,
+      ),
+
       actions: [
         IconButton(
           onPressed: onSearchTap,
           tooltip: 'Search',
-          icon: const Icon(
-            Icons.search_rounded,
-          ),
+          icon: const Icon(Icons.search_rounded),
         ),
-
         IconButton(
           onPressed: onNotificationTap,
           tooltip: 'Notifications',
-          icon: const Icon(
-            Icons.notifications_none_rounded,
-          ),
+          icon: const Icon(Icons.notifications_none_rounded),
         ),
-
-        const SizedBox(width: 6),
         IconButton(
-          icon: const Icon(Icons.settings_outlined),
           tooltip: 'Settings',
+          icon: const Icon(Icons.settings_outlined),
           onPressed: () {
             Navigator.push(
               context,
@@ -91,10 +88,21 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
             );
           },
         ),
+        const SizedBox(width: 6),
       ],
+
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(1),
+        child: Container(
+          height: 1,
+          color: colorScheme.outlineVariant.withValues(
+            alpha: isDark ? 0.35 : 0.5,
+          ),
+        ),
+      ),
     );
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight + 1);
 }

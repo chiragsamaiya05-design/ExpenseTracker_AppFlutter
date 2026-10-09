@@ -8,6 +8,7 @@ class RecentTransactionItem extends StatelessWidget {
   final VoidCallback onDelete;
 
   const RecentTransactionItem({
+    super.key,
     required this.expense,
     required this.onEdit,
     required this.onDelete,
@@ -62,17 +63,8 @@ class RecentTransactionItem extends StatelessWidget {
   String _getDateLabel(DateTime date) {
     final now = DateTime.now();
 
-    final today = DateTime(
-      now.year,
-      now.month,
-      now.day,
-    );
-
-    final expenseDate = DateTime(
-      date.year,
-      date.month,
-      date.day,
-    );
+    final today = DateTime(now.year, now.month, now.day);
+    final expenseDate = DateTime(date.year, date.month, date.day);
 
     final difference = today.difference(expenseDate).inDays;
 
@@ -84,7 +76,7 @@ class RecentTransactionItem extends StatelessWidget {
       return 'Yesterday';
     }
 
-    if (difference < 7) {
+    if (difference > 1 && difference < 7) {
       const days = [
         'Monday',
         'Tuesday',
@@ -104,93 +96,133 @@ class RecentTransactionItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final color = _getCategoryColor(expense.category);
+    final colorScheme = theme.colorScheme;
+    final categoryColor = _getCategoryColor(expense.category);
 
-    return InkWell(
-      onTap: onEdit,
+    final expenseTitle = expense.title.isNotEmpty
+        ? '${expense.title[0].toUpperCase()}${expense.title.substring(1)}'
+        : '';
+
+    return Material(
+      color: Colors.transparent,
       borderRadius: BorderRadius.circular(18),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 14,
-          vertical: 12,
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 42,
-              height: 42,
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.10),
-                shape: BoxShape.circle,
+      child: InkWell(
+        onTap: onEdit,
+        borderRadius: BorderRadius.circular(18),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 14,
+            vertical: 12,
+          ),
+          child: Row(
+            children: [
+              // Category icon.
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: categoryColor.withValues(alpha: 0.14),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  _getCategoryIcon(expense.category),
+                  size: 20,
+                  color: categoryColor,
+                ),
               ),
-              child: Icon(
-                _getCategoryIcon(expense.category),
-                size: 20,
-                color: color,
+
+              const SizedBox(width: 12),
+
+              // Transaction title, category, and date.
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      expenseTitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: colorScheme.onSurface,
+                      ),
+                    ),
+
+                    const SizedBox(height: 3),
+
+                    Text(
+                      '${expense.category} • ${_getDateLabel(expense.date)}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
 
-            const SizedBox(width: 12),
+              const SizedBox(width: 8),
 
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    expense.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
+              // Expense amount.
+              Text(
+                '₹${expense.amount.toStringAsFixed(0)}',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: colorScheme.onSurface,
+                ),
+              ),
+
+              // Edit and delete menu.
+              PopupMenuButton<String>(
+                padding: EdgeInsets.zero,
+                iconSize: 20,
+                tooltip: 'Transaction options',
+                icon: Icon(
+                  Icons.more_vert_rounded,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+                onSelected: (value) {
+                  if (value == 'edit') {
+                    onEdit();
+                  } else if (value == 'delete') {
+                    onDelete();
+                  }
+                },
+                itemBuilder: (context) => [
+                  const PopupMenuItem(
+                    value: 'edit',
+                    child: Row(
+                      children: [
+                        Icon(Icons.edit_rounded, size: 18),
+                        SizedBox(width: 10),
+                        Text('Edit'),
+                      ],
                     ),
                   ),
-
-                  const SizedBox(height: 3),
-
-                  Text(
-                    '${expense.category} • ${_getDateLabel(expense.date)}',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
+                  PopupMenuItem(
+                    value: 'delete',
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.delete_outline_rounded,
+                          size: 18,
+                          color: colorScheme.error,
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          'Delete',
+                          style: TextStyle(
+                            color: colorScheme.error,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
-            ),
-
-            const SizedBox(width: 8),
-
-            Text(
-              '₹${expense.amount.toStringAsFixed(0)}',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-
-            PopupMenuButton<String>(
-              padding: EdgeInsets.zero,
-              iconSize: 20,
-              onSelected: (value) {
-                if (value == 'edit') {
-                  onEdit();
-                } else if (value == 'delete') {
-                  onDelete();
-                }
-              },
-              itemBuilder: (context) => const [
-                PopupMenuItem(
-                  value: 'edit',
-                  child: Text('Edit'),
-                ),
-                PopupMenuItem(
-                  value: 'delete',
-                  child: Text('Delete'),
-                ),
-              ],
-              icon: const Icon(
-                Icons.more_vert_rounded,
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -24,8 +24,9 @@ class SettingsTile extends StatelessWidget {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(
         horizontal: 16,
-        vertical: 4,
+        vertical: 5,
       ),
+      minLeadingWidth: 42,
       leading: Container(
         width: 42,
         height: 42,
@@ -42,26 +43,36 @@ class SettingsTile extends StatelessWidget {
       title: Text(
         title,
         style: theme.textTheme.titleMedium?.copyWith(
+          color: colorScheme.onSurface,
           fontWeight: FontWeight.w600,
         ),
       ),
       subtitle: subtitle == null
           ? null
           : Padding(
-        padding: const EdgeInsets.only(top: 3),
+        padding: const EdgeInsets.only(top: 4),
         child: Text(
           subtitle!,
           style: theme.textTheme.bodySmall?.copyWith(
             color: colorScheme.onSurfaceVariant,
+            height: 1.35,
           ),
         ),
       ),
       trailing: trailing ??
-          Icon(
+          (onTap != null
+              ? Icon(
             Icons.chevron_right_rounded,
             color: colorScheme.onSurfaceVariant,
-          ),
+            size: 22,
+          )
+              : null),
       onTap: onTap,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+      ),
+      splashColor: colorScheme.primary.withValues(alpha: 0.08),
+      hoverColor: colorScheme.primary.withValues(alpha: 0.05),
     );
   }
 }

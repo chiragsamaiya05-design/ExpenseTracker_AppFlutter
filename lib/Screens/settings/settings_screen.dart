@@ -1,7 +1,9 @@
 import 'package:expense_tracker/Screens/settings/profile_screen.dart';
 import 'package:expense_tracker/Screens/settings/security_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../../controllers/theme_controller.dart';
 import '../../widgets/settings/settings_section.dart';
 import '../../widgets/settings/settings_tile.dart';
 import 'appearance_screen.dart';
@@ -13,11 +15,32 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final themeController = context.watch<ThemeController>();
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: Text(
+          'Settings',
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: colorScheme.onSurface,
+          ),
+        ),
         centerTitle: false,
+        backgroundColor: theme.scaffoldBackgroundColor,
+        foregroundColor: colorScheme.onSurface,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(
+            height: 1,
+            color: colorScheme.outlineVariant.withValues(
+              alpha: theme.brightness == Brightness.dark ? 0.35 : 0.5,
+            ),
+          ),
+        ),
       ),
 
       body: SafeArea(
@@ -80,7 +103,11 @@ class SettingsScreen extends StatelessWidget {
                 SettingsTile(
                   icon: Icons.palette_outlined,
                   title: 'Appearance',
-                  subtitle: 'System default',
+                  subtitle: switch (themeController.themeMode) {
+                    ThemeMode.light => 'Light',
+                    ThemeMode.dark => 'Dark',
+                    ThemeMode.system => 'System default',
+                  },
                   onTap: () {
                     Navigator.push(
                       context,

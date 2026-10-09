@@ -32,8 +32,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
 
   final _amountController = TextEditingController();
 
-
-
   DateTime _selectedDate = DateTime.now();
 
   String _selectedCategory = 'Food';
@@ -119,13 +117,33 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   Widget build(BuildContext context) {
     final bool isEditing =
         widget.expense != null;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
-          isEditing
-              ? 'Edit Expense'
-              : 'Add Expense',
+          isEditing ? 'Edit Expense' : 'Add Expense',
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: colorScheme.onSurface,
+          ),
+        ),
+        backgroundColor: theme.scaffoldBackgroundColor,
+        foregroundColor: colorScheme.onSurface,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(
+            height: 1,
+            color: colorScheme.outlineVariant.withValues(
+              alpha: isDark ? 0.35 : 0.5,
+            ),
+          ),
         ),
       ),
 
@@ -203,33 +221,47 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
 
                   Card(
                     margin: EdgeInsets.zero,
-
+                    color: colorScheme.surfaceContainerLow,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      side: BorderSide(
+                        color: colorScheme.outlineVariant.withValues(
+                          alpha: isDark ? 0.35 : 0.5,
+                        ),
+                      ),
+                    ),
                     child: SwitchListTile(
                       value: _isRecurring,
-
+                      activeThumbColor: colorScheme.primary,
+                      activeTrackColor: colorScheme.primary.withValues(
+                        alpha: 0.35,
+                      ),
                       onChanged: (value) {
                         setState(() {
                           _isRecurring = value;
 
-                          // Clear end date when
-                          // recurring is disabled.
                           if (!value) {
-                            _recurringEndDate =
-                            null;
+                            _recurringEndDate = null;
                           }
                         });
                       },
-
-                      title: const Text(
+                      title: Text(
                         'Make this a recurring expense',
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: colorScheme.onSurface,
+                        ),
                       ),
-
-                      subtitle: const Text(
+                      subtitle: Text(
                         'Automatically add this expense again later',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
                       ),
-
-                      secondary: const Icon(
-                        Icons.repeat,
+                      secondary: Icon(
+                        Icons.repeat_rounded,
+                        color: colorScheme.primary,
                       ),
                     ),
                   ),
@@ -239,19 +271,16 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                       frequency: _recurringFrequency,
                       endDate: _recurringEndDate,
                       selectedDate: _selectedDate,
-
                       onFrequencyChanged: (frequency) {
                         setState(() {
                           _recurringFrequency = frequency;
                         });
                       },
-
                       onEndDateChanged: (date) {
                         setState(() {
                           _recurringEndDate = date;
                         });
                       },
-
                       onClearEndDate: () {
                         setState(() {
                           _recurringEndDate = null;
@@ -271,18 +300,23 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
 
                   child: ElevatedButton(
                     onPressed: _saveExpense,
-
                     style: ElevatedButton.styleFrom(
-                      padding:
-                      const EdgeInsets.symmetric(
-                        vertical: 15,
+                      backgroundColor: const Color(0xFF6557D9),
+                      foregroundColor: Colors.white,
+                      disabledBackgroundColor: colorScheme.surfaceContainerHighest,
+                      disabledForegroundColor: colorScheme.onSurfaceVariant,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
                       ),
                     ),
-
                     child: Text(
-                      isEditing
-                          ? 'Update Expense'
-                          : 'Add Expense',
+                      isEditing ? 'Update Expense' : 'Add Expense',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ),

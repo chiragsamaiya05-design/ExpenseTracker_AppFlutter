@@ -19,7 +19,6 @@ class AddDailyBudgetBottomSheet extends StatefulWidget {
 
 class _AddDailyBudgetBottomSheetState
     extends State<AddDailyBudgetBottomSheet> {
-
   late final TextEditingController _amountController;
 
   @override
@@ -62,6 +61,11 @@ class _AddDailyBudgetBottomSheetState
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    const primaryColor = Color(0xFF6557D9);
+
     return SafeArea(
       child: Padding(
         padding: EdgeInsets.only(
@@ -74,14 +78,13 @@ class _AddDailyBudgetBottomSheetState
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
             // Handle
             Center(
               child: Container(
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade400,
+                  color: colorScheme.outlineVariant,
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
@@ -89,11 +92,12 @@ class _AddDailyBudgetBottomSheetState
 
             const SizedBox(height: 20),
 
-            const Text(
+            Text(
               'Set Daily Budget',
-              style: TextStyle(
+              style: theme.textTheme.titleLarge?.copyWith(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
+                color: colorScheme.onSurface,
               ),
             ),
 
@@ -101,8 +105,8 @@ class _AddDailyBudgetBottomSheetState
 
             Text(
               'Set your spending limit for today.',
-              style: TextStyle(
-                color: Colors.grey.shade600,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
                 fontSize: 14,
               ),
             ),
@@ -112,16 +116,43 @@ class _AddDailyBudgetBottomSheetState
             TextField(
               controller: _amountController,
               autofocus: true,
-              keyboardType:
-              const TextInputType.numberWithOptions(
+              keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
+              ),
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: colorScheme.onSurface,
+                fontWeight: FontWeight.w500,
               ),
               decoration: InputDecoration(
                 prefixText: '₹ ',
                 hintText: '500',
                 labelText: 'Daily Budget',
-                border: OutlineInputBorder(
+                prefixStyle: TextStyle(
+                  color: colorScheme.primary,
+                  fontWeight: FontWeight.w600,
+                ),
+                filled: true,
+                fillColor: colorScheme.surfaceContainerHighest
+                    .withValues(alpha: 0.35),
+                labelStyle: TextStyle(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+                hintStyle: TextStyle(
+                  color: colorScheme.onSurfaceVariant
+                      .withValues(alpha: 0.65),
+                ),
+                enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: colorScheme.outlineVariant,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(
+                    color: primaryColor,
+                    width: 1.8,
+                  ),
                 ),
               ),
             ),
@@ -132,14 +163,26 @@ class _AddDailyBudgetBottomSheetState
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
-                onPressed:
-                widget.isLoading ? null : _save,
+                onPressed: widget.isLoading ? null : _save,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryColor,
+                  foregroundColor: Colors.white,
+                  disabledBackgroundColor: colorScheme
+                      .surfaceContainerHighest,
+                  disabledForegroundColor:
+                  colorScheme.onSurfaceVariant,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
                 child: widget.isLoading
                     ? const SizedBox(
                   height: 22,
                   width: 22,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
+                    color: Colors.white,
                   ),
                 )
                     : const Text(

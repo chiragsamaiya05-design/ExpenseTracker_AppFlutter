@@ -56,8 +56,11 @@ class BudgetScreen extends StatelessWidget {
     final expenseController =
     context.watch<ExpenseController>();
 
+    final theme = Theme.of(context);
+
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F4FC),
+      backgroundColor: theme.scaffoldBackgroundColor,
 
       appBar: const AppBarWidget(
         title: 'Budget',
@@ -82,20 +85,21 @@ class BudgetScreen extends StatelessWidget {
 
           TodayBudgetCard(
             budget: expenseController.dailyBudget,
-            remaining:
-            expenseController.dailyBudgetRemaining,
-            isExceeded:
-            expenseController.isDailyBudgetExceeded,
+            remaining: expenseController.dailyBudgetRemaining,
+            isExceeded: expenseController.isDailyBudgetExceeded,
             onEdit: () {
               _showDailyBudgetSheet(
-                  context,
-                  expenseController,);
+                context,
+                expenseController,
+              );
             },
           ),
 
           const SizedBox(height: 22),
 
-
+          // =====================================================
+          // TODAY'S SPENDING
+          // =====================================================
 
           const BudgetSectionHeader(
             title: "Today's Spending",
@@ -111,13 +115,18 @@ class BudgetScreen extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => const TodayExpensesScreen(),
+                  builder: (_) =>
+                  const TodayExpensesScreen(),
                 ),
               );
             },
           ),
 
           const SizedBox(height: 22),
+
+          // =====================================================
+          // CATEGORY BUDGETS
+          // =====================================================
 
           const BudgetSectionHeader(
             title: 'Category Budgets',
@@ -174,7 +183,9 @@ class BudgetScreen extends StatelessWidget {
     );
   }
 
-
+  // ===========================================================
+  // TODAY EXPENSE COUNT
+  // ===========================================================
 
   int _getTodayExpenseCount(
       ExpenseController controller,
@@ -190,7 +201,9 @@ class BudgetScreen extends StatelessWidget {
     ).length;
   }
 
-
+  // ===========================================================
+  // ADD BUDGET
+  // ===========================================================
 
   Future<void> _openAddBudgetScreen(
       BuildContext context,
@@ -209,7 +222,9 @@ class BudgetScreen extends StatelessWidget {
         .loadBudgetData();
   }
 
-
+  // ===========================================================
+  // EDIT BUDGET
+  // ===========================================================
 
   Future<void> _editBudget(
       BuildContext context,
@@ -231,6 +246,9 @@ class BudgetScreen extends StatelessWidget {
         .loadBudgetData();
   }
 
+  // ===========================================================
+  // DELETE BUDGET
+  // ===========================================================
 
   Future<void> _deleteBudget(
       BuildContext context,
@@ -238,32 +256,37 @@ class BudgetScreen extends StatelessWidget {
       ) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
         return AlertDialog(
-          title: const Text(
+          backgroundColor: Theme.of(dialogContext).colorScheme.surface,
+          title: Text(
             'Delete Budget?',
+            style: TextStyle(
+              color: Theme.of(dialogContext).colorScheme.onSurface,
+              fontWeight: FontWeight.w700,
+            ),
           ),
           content: Text(
             'Are you sure you want to delete '
                 'the ${budget.category} budget?',
+            style: TextStyle(
+              color: Theme.of(dialogContext).colorScheme.onSurfaceVariant,
+            ),
           ),
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.pop(
-                  context,
-                  false,
-                );
+                Navigator.pop(dialogContext, false);
               },
               child: const Text('Cancel'),
             ),
-
             FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFF6557D9),
+                foregroundColor: Colors.white,
+              ),
               onPressed: () {
-                Navigator.pop(
-                  context,
-                  true,
-                );
+                Navigator.pop(dialogContext, true);
               },
               child: const Text('Delete'),
             ),
@@ -278,22 +301,29 @@ class BudgetScreen extends StatelessWidget {
 
     await context
         .read<BudgetController>()
-        .loadBudgetData();
+        .deleteBudget(
+      budget.id,
+      budget.month,
+    );
   }
-  Future<void> _showDailyBudgetSheet(
-      BuildContext context,
-      ExpenseController controller,
-      ) async {
+
+  // ===========================================================
+  // DAILY BUDGET SHEET
+  // ===========================================================
+
+  Future<void> _showDailyBudgetSheet(BuildContext context, ExpenseController controller,) async {
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
-      builder: (context) {
+        backgroundColor: Theme.of(context).colorScheme.surface,
+      builder: (sheetContext) {
         return AddDailyBudgetBottomSheet(
           currentBudget: controller.dailyBudget,
           isLoading: controller.isDailyBudgetLoading,
           onSave: (amount) async {
-            await controller.saveDailyBudget(amount);
+            await controller.saveDailyBudget(
+              amount,
+            );
           },
         );
       },

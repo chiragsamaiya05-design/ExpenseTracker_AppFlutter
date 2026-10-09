@@ -142,21 +142,22 @@ class _EditBudgetScreenState extends State<EditBudgetScreen> {
   @override
   Widget build(BuildContext context) {
     final controller = context.watch<BudgetController>();
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
-
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Edit Budget',
-          style: TextStyle(
+          style: theme.textTheme.titleLarge?.copyWith(
             fontSize: 20,
             fontWeight: FontWeight.w600,
-            color: Colors.white,
+            color: colorScheme.onSurface,
           ),
         ),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
+        backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
         elevation: 0,
       ),
 
@@ -169,12 +170,12 @@ class _EditBudgetScreenState extends State<EditBudgetScreen> {
             children: [
 
               // CATEGORY
-              const Text(
+              Text(
                 'Budget Category',
-                style: TextStyle(
+                style: theme.textTheme.titleSmall?.copyWith(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
+                  color: colorScheme.onSurface,
                 ),
               ),
 
@@ -197,7 +198,7 @@ class _EditBudgetScreenState extends State<EditBudgetScreen> {
                           size: 18,
                           color: isSelected
                               ? Colors.white
-                              : AppColors.textSecondary,
+                              : colorScheme.onSurfaceVariant,
                         ),
 
                         const SizedBox(width: 7),
@@ -216,24 +217,20 @@ class _EditBudgetScreenState extends State<EditBudgetScreen> {
                       });
                     },
 
-                    selectedColor: AppColors.primary,
+                    selectedColor: const Color(0xFF6557D9),
+                    backgroundColor: colorScheme.surface,
 
-                    backgroundColor: Colors.white,
+                    side: BorderSide(
+                      color: isSelected
+                          ? const Color(0xFF6557D9)
+                          : colorScheme.outlineVariant,
+                    ),
 
                     labelStyle: TextStyle(
                       color: isSelected
                           ? Colors.white
-                          : AppColors.textPrimary,
+                          : colorScheme.onSurface,
                       fontWeight: FontWeight.w500,
-                    ),
-
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                      side: BorderSide(
-                        color: isSelected
-                            ? AppColors.primary
-                            : AppColors.border,
-                      ),
                     ),
 
                     padding: const EdgeInsets.symmetric(
@@ -247,13 +244,13 @@ class _EditBudgetScreenState extends State<EditBudgetScreen> {
               const SizedBox(height: 28),
 
               // AMOUNT
-              const Text(
+               Text(
                 'Budget Amount',
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
-                ),
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: colorScheme.onSurface,
+                  ),
               ),
 
               const SizedBox(height: 12),
@@ -266,23 +263,25 @@ class _EditBudgetScreenState extends State<EditBudgetScreen> {
                   decimal: true,
                 ),
 
-                style: const TextStyle(
+                style: theme.textTheme.titleLarge?.copyWith(
                   fontSize: 20,
                   fontWeight: FontWeight.w600,
+                  color: colorScheme.onSurface,
                 ),
 
                 decoration: InputDecoration(
                   hintText: 'Enter budget amount',
 
-                  prefixIcon: const Icon(
+                  prefixIcon: Icon(
                     Icons.currency_rupee_rounded,
+                    color: colorScheme.primary,
                   ),
 
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: colorScheme.surfaceContainerHighest
+                      .withValues(alpha: 0.35),
 
-                  contentPadding:
-                  const EdgeInsets.symmetric(
+                  contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 18,
                   ),
@@ -295,14 +294,14 @@ class _EditBudgetScreenState extends State<EditBudgetScreen> {
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
                     borderSide: BorderSide(
-                      color: AppColors.border,
+                      color: colorScheme.outlineVariant,
                     ),
                   ),
 
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
                     borderSide: const BorderSide(
-                      color: AppColors.primary,
+                      color: Color(0xFF6557D9),
                       width: 2,
                     ),
                   ),
@@ -312,12 +311,12 @@ class _EditBudgetScreenState extends State<EditBudgetScreen> {
               const SizedBox(height: 28),
 
               // MONTH
-              const Text(
+               Text(
                 'Budget Month',
-                style: TextStyle(
+                style: theme.textTheme.titleSmall?.copyWith(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
+                  color: colorScheme.onSurface,
                 ),
               ),
 
@@ -332,10 +331,10 @@ class _EditBudgetScreenState extends State<EditBudgetScreen> {
                 ),
 
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: colorScheme.surface,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: AppColors.border,
+                    color: colorScheme.outlineVariant,
                   ),
                 ),
 
@@ -345,9 +344,8 @@ class _EditBudgetScreenState extends State<EditBudgetScreen> {
                       padding: const EdgeInsets.all(7),
 
                       decoration: BoxDecoration(
-                        color: AppColors.primary.withOpacity(0.1),
-                        borderRadius:
-                        BorderRadius.circular(9),
+                        color: colorScheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(9),
                       ),
 
                       child: const Icon(
@@ -365,12 +363,11 @@ class _EditBudgetScreenState extends State<EditBudgetScreen> {
                         CrossAxisAlignment.start,
 
                         children: [
-                          const Text(
+                          Text(
                             'Month',
-                            style: TextStyle(
+                            style: theme.textTheme.bodySmall?.copyWith(
                               fontSize: 12,
-                              color:
-                              AppColors.textSecondary,
+                              color: colorScheme.onSurfaceVariant,
                             ),
                           ),
 
@@ -378,12 +375,10 @@ class _EditBudgetScreenState extends State<EditBudgetScreen> {
 
                           Text(
                             _monthName(widget.budget.month),
-                            style: const TextStyle(
+                            style: theme.textTheme.titleMedium?.copyWith(
                               fontSize: 16,
-                              fontWeight:
-                              FontWeight.w600,
-                              color:
-                              AppColors.textPrimary,
+                              fontWeight: FontWeight.w600,
+                              color: colorScheme.onSurface,
                             ),
                           ),
                         ],
@@ -407,16 +402,13 @@ class _EditBudgetScreenState extends State<EditBudgetScreen> {
                       : updateBudget,
 
                   style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                    AppColors.primary,
-
+                    backgroundColor: const Color(0xFF6557D9),
                     foregroundColor: Colors.white,
-
+                    disabledBackgroundColor: colorScheme.surfaceContainerHighest,
+                    disabledForegroundColor: colorScheme.onSurfaceVariant,
                     elevation: 0,
-
                     shape: RoundedRectangleBorder(
-                      borderRadius:
-                      BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                   ),
 

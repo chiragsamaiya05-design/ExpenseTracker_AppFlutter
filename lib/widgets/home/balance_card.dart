@@ -33,6 +33,28 @@ class BalanceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
+    final gradientColors = isDark
+        ? const [
+      Color(0xFF292644),
+      Color(0xFF393354),
+    ]
+        : const [
+      Color(0xFFA8A4D8),
+      Color(0xFFC1BEE8),
+    ];
+
+    final primaryTextColor =
+    isDark ? const Color(0xFFF4F1FF) : const Color(0xFF3E3A68);
+
+    final secondaryTextColor =
+    isDark ? const Color(0xFFD0CBE8) : const Color(0xFF514D7A);
+
+    final dividerColor = isDark
+        ? Colors.white.withValues(alpha: 0.14)
+        : const Color(0xFF7F7BAF).withValues(alpha: 0.22);
 
     return Container(
       width: double.infinity,
@@ -40,18 +62,18 @@ class BalanceCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(26),
 
         // Light lavender gradient
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Color(0xFFA8A4D8),
-            Color(0xFFC1BEE8),
-          ],
+          colors: gradientColors,
+          
         ),
 
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF7772AD).withValues(alpha: 0.20),
+            color: isDark
+            ? Colors.black.withValues(alpha: 0.25)
+                : const Color(0xFF7772AD).withValues(alpha: 0.20),
             blurRadius: 18,
             offset: const Offset(0, 8),
           ),
@@ -111,13 +133,15 @@ class BalanceCard extends StatelessWidget {
                       width: 34,
                       height: 34,
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.32),
+                        color: Colors.white.withValues(
+                          alpha: isDark ? 0.10 : 0.32,
+                        ),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.account_balance_wallet_rounded,
                         size: 19,
-                        color: Color(0xFF4A4675),
+                        color: secondaryTextColor,
                       ),
                     ),
 
@@ -126,7 +150,7 @@ class BalanceCard extends StatelessWidget {
                     Text(
                       'Total Balance',
                       style: theme.textTheme.titleSmall?.copyWith(
-                        color: const Color(0xFF514D7A),
+                        color: secondaryTextColor,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -142,7 +166,7 @@ class BalanceCard extends StatelessWidget {
                 Text(
                   _formatAmount(balance),
                   style: theme.textTheme.headlineMedium?.copyWith(
-                    color: const Color(0xFF3E3A68),
+                    color: primaryTextColor,
                     fontWeight: FontWeight.w800,
                     fontSize: 30,
                     letterSpacing: -0.8,
@@ -157,9 +181,7 @@ class BalanceCard extends StatelessWidget {
 
                 Container(
                   height: 1,
-                  color: const Color(0xFF7F7BAF).withValues(
-                    alpha: 0.18,
-                  ),
+                  color: dividerColor,
                 ),
 
                 const SizedBox(height: 14),
@@ -183,9 +205,7 @@ class BalanceCard extends StatelessWidget {
                     Container(
                       width: 1,
                       height: 46,
-                      color: const Color(0xFF7F7BAF).withValues(
-                        alpha: 0.18,
-                      ),
+                        color: dividerColor,
                     ),
 
                     Expanded(
