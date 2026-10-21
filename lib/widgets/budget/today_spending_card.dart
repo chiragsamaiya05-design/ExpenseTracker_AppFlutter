@@ -14,21 +14,40 @@ class TodaySpendingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
+    const accentColor = Color(0xFF26B99A);
+
+    final cardBackground = isDark
+        ? colorScheme.surfaceContainer
+        : const Color(0xFFEFFFF5);
+
+    final cardBorder = isDark
+        ? colorScheme.outlineVariant
+        : const Color(0xFFD4EDE0);
+
+    final primaryTextColor = colorScheme.onSurface;
+
+    final secondaryTextColor = colorScheme.onSurfaceVariant;
     return Container(
       height: 112,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           colors: [
-            Color(0xFFEFFFF5),
-            Colors.white,
+            cardBackground,
+            isDark
+                ? colorScheme.surface
+                : Colors.white,
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFFD4EDE0),
+          color: cardBorder
         ),
       ),
       child: Column(
@@ -40,8 +59,7 @@ class TodaySpendingCard extends StatelessWidget {
                 width: 30,
                 height: 30,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF26B99A)
-                      .withOpacity(0.12),
+                    color: accentColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(9),
                 ),
                 child: const Icon(
@@ -53,16 +71,16 @@ class TodaySpendingCard extends StatelessWidget {
 
               const SizedBox(width: 8),
 
-              const Expanded(
+              Expanded(
                 child: Text(
                   "Today's Spending",
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF292747),
-                  ),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: primaryTextColor,
+                    ),
                 ),
               ),
 
@@ -71,7 +89,7 @@ class TodaySpendingCard extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF26B99A),
+                  color: accentColor,
                 ),
               ),
             ],
@@ -81,10 +99,10 @@ class TodaySpendingCard extends StatelessWidget {
 
           Text(
             '₹${totalSpent.toStringAsFixed(0)}',
-            style: const TextStyle(
+            style: theme.textTheme.bodyMedium?.copyWith(
               fontSize: 20,
-              fontWeight: FontWeight.w800,
-              color: Color(0xFF292747),
+              fontWeight: FontWeight.w700,
+              color: primaryTextColor,
             ),
           ),
 
@@ -94,9 +112,10 @@ class TodaySpendingCard extends StatelessWidget {
                 expenseCount == 1
                     ? '1 transaction'
                     : '$expenseCount transactions',
-                style: TextStyle(
+                style: theme.textTheme.bodyMedium?.copyWith(
                   fontSize: 10,
-                  color: Colors.grey.shade600,
+                  fontWeight: FontWeight.w700,
+                  color: primaryTextColor,
                 ),
               ),
 
@@ -104,12 +123,18 @@ class TodaySpendingCard extends StatelessWidget {
 
               GestureDetector(
                 onTap: onViewExpenses,
-                child: const Text(
-                  'View',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF26B99A),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 4,
+                    vertical: 2,
+                  ),
+                  child: const Text(
+                    'View',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      color: accentColor,
+                    ),
                   ),
                 ),
               ),

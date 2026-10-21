@@ -129,9 +129,16 @@ class _AddBudgetScreenState extends State<AddBudgetScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final controller = context.watch<BudgetController>();
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Add Budget'),
+        backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
+        elevation: 0,
       ),
 
       body: SingleChildScrollView(
@@ -172,23 +179,21 @@ class _AddBudgetScreenState extends State<AddBudgetScreen> {
                       size: 18,
                       color: isSelected
                           ? Colors.white
-                          : Colors.grey.shade700,
+                          : colorScheme.onSurfaceVariant,
                     ),
 
                     label: Text(category),
 
                     selected: isSelected,
 
-                    selectedColor:
-                    AppColors.primary,
+                    selectedColor: const Color(0xFF6557D9),
 
-                    backgroundColor:
-                    Colors.white,
+                    backgroundColor: colorScheme.surface,
 
                     side: BorderSide(
                       color: isSelected
-                          ? AppColors.primary
-                          : Colors.grey.shade300,
+                          ? const Color(0xFF6557D9)
+                          : colorScheme.outlineVariant,
                     ),
 
                     shape:
@@ -200,8 +205,7 @@ class _AddBudgetScreenState extends State<AddBudgetScreen> {
                     labelStyle: TextStyle(
                       color: isSelected
                           ? Colors.white
-                          : Colors.grey.shade800,
-
+                          : colorScheme.onSurface,
                       fontWeight: isSelected
                           ? FontWeight.w600
                           : FontWeight.normal,
@@ -229,57 +233,48 @@ class _AddBudgetScreenState extends State<AddBudgetScreen> {
             // BUDGET AMOUNT
             // -------------------------
 
+            // -------------------------
+// BUDGET AMOUNT
+// -------------------------
+
             TextField(
               controller: _amountController,
-
-              keyboardType:
-              const TextInputType.numberWithOptions(
+              keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
-
-              style: const TextStyle(
+              style: theme.textTheme.titleLarge?.copyWith(
                 fontSize: 20,
                 fontWeight: FontWeight.w600,
+                color: colorScheme.onSurface,
               ),
-
               decoration: InputDecoration(
                 labelText: 'Budget Amount',
                 hintText: '0.00',
-
-                prefixIcon: const Icon(
+                prefixIcon: Icon(
                   Icons.currency_rupee_rounded,
+                  color: colorScheme.primary,
                 ),
-
                 filled: true,
-                fillColor: Colors.white,
-
-                contentPadding:
-                const EdgeInsets.symmetric(
+                fillColor: colorScheme.surfaceContainerHighest
+                    .withValues(alpha: isDark ? 0.35 : 0.5),
+                contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 18,
                 ),
-
                 border: OutlineInputBorder(
-                  borderRadius:
-                  BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(16),
                   borderSide: BorderSide.none,
                 ),
-
-                enabledBorder:
-                OutlineInputBorder(
-                  borderRadius:
-                  BorderRadius.circular(16),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
                   borderSide: BorderSide(
-                    color: Colors.grey.shade200,
+                    color: colorScheme.outlineVariant,
                   ),
                 ),
-
-                focusedBorder:
-                OutlineInputBorder(
-                  borderRadius:
-                  BorderRadius.circular(16),
-                  borderSide: BorderSide(
-                    color: AppColors.primary,
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: const BorderSide(
+                    color: Color(0xFF6557D9),
                     width: 2,
                   ),
                 ),
@@ -288,48 +283,35 @@ class _AddBudgetScreenState extends State<AddBudgetScreen> {
 
             const SizedBox(height: 24),
 
-            // -------------------------
-            // MONTH
-            // -------------------------
+// -------------------------
+// MONTH
+// -------------------------
 
             Container(
               width: double.infinity,
-
-              padding:
-              const EdgeInsets.symmetric(
+              padding: const EdgeInsets.symmetric(
                 horizontal: 16,
                 vertical: 12,
               ),
-
               decoration: BoxDecoration(
-                color: Colors.white,
-
-                borderRadius:
-                BorderRadius.circular(16),
-
+                color: colorScheme.surface,
+                borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: Colors.grey.shade200,
+                  color: colorScheme.outlineVariant,
                 ),
               ),
-
               child: Row(
                 children: [
                   Container(
-                    padding:
-                    const EdgeInsets.all(7),
-
+                    padding: const EdgeInsets.all(7),
                     decoration: BoxDecoration(
-                      color: AppColors.primary
-                          .withOpacity(0.1),
-
-                      borderRadius:
-                      BorderRadius.circular(9),
+                      color: colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(9),
                     ),
-
-                    child: const Icon(
+                    child: Icon(
                       Icons.calendar_month_rounded,
                       size: 20,
-                      color: AppColors.primary,
+                      color: colorScheme.primary,
                     ),
                   ),
 
@@ -337,16 +319,13 @@ class _AddBudgetScreenState extends State<AddBudgetScreen> {
 
                   Expanded(
                     child: Column(
-                      crossAxisAlignment:
-                      CrossAxisAlignment.start,
-
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           'Budget Month',
-                          style: TextStyle(
+                          style: theme.textTheme.bodySmall?.copyWith(
                             fontSize: 12,
-                            color:
-                            Colors.grey.shade600,
+                            color: colorScheme.onSurfaceVariant,
                           ),
                         ),
 
@@ -355,12 +334,13 @@ class _AddBudgetScreenState extends State<AddBudgetScreen> {
                         Text(
                           _monthName(
                             int.parse(
-                              context.read<BudgetController>().currentMonth.split('-')[1],
+                              controller.currentMonth.split('-')[1],
                             ),
                           ),
-                          style: const TextStyle(
+                          style: theme.textTheme.titleMedium?.copyWith(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
+                            color: colorScheme.onSurface,
                           ),
                         ),
                       ],
@@ -372,41 +352,28 @@ class _AddBudgetScreenState extends State<AddBudgetScreen> {
 
             const SizedBox(height: 30),
 
-            // -------------------------
-            // SAVE BUTTON
-            // -------------------------
+// -------------------------
+// SAVE BUTTON
+// -------------------------
 
             SizedBox(
               width: double.infinity,
               height: 52,
-
               child: ElevatedButton(
                 onPressed: saveBudget,
-
-                style:
-                ElevatedButton.styleFrom(
-                  backgroundColor:
-                  AppColors.primary,
-
-                  foregroundColor:
-                  Colors.white,
-
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF6557D9),
+                  foregroundColor: Colors.white,
                   elevation: 0,
-
-                  shape:
-                  RoundedRectangleBorder(
-                    borderRadius:
-                    BorderRadius.circular(16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
                   ),
                 ),
-
                 child: const Text(
                   'Save Budget',
-
                   style: TextStyle(
                     fontSize: 16,
-                    fontWeight:
-                    FontWeight.w600,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
@@ -423,5 +390,20 @@ class _AddBudgetScreenState extends State<AddBudgetScreen> {
   // MONTH NAME
   // -------------------------
 
+  Future<void> _openAddBudgetScreen(
+      BuildContext context,
+      ) async {
+    final budgetController =
+    context.read<BudgetController>();
 
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ChangeNotifierProvider.value(
+          value: budgetController,
+          child: const AddBudgetScreen(),
+        ),
+      ),
+    );
+  }
 }

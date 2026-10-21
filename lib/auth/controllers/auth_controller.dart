@@ -51,13 +51,17 @@ class AuthController extends ChangeNotifier {
   Future<bool> verifyOtp(String otp) async {
     errorMessage = null;
 
+    // Step 1: Validate OTP
     if (otp != hardcodedOtp) {
       errorMessage = 'Invalid OTP';
       notifyListeners();
       return false;
     }
 
-    if (pendingPhone == null || pendingPhone!.isEmpty) {
+    // Step 2: Validate phone number
+    final phone = pendingPhone?.trim();
+
+    if (phone == null || phone.isEmpty) {
       errorMessage = 'Phone number not found';
       notifyListeners();
       return false;
@@ -67,74 +71,81 @@ class AuthController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final phone = pendingPhone!;
-      final existingUser =
-      await repository.getUserByPhone(pendingPhone!);
-
-
       // SIGNUP FLOW
       if (isSignupFlow) {
+        // Check for an existing local account.
+        final existingUser = await repository.getUserByPhone(phone);
+
         if (existingUser != null) {
           errorMessage =
-          'An account already exists with this number.';
+          'An account already exists with this number. Please log in.';
           return false;
         }
-        if (pendingPassword == null || pendingPassword!.isEmpty) {
+
+        // Validate password.
+        final password = pendingPassword;
+
+        if (password == null || password.isEmpty) {
           errorMessage = 'Password is required.';
           return false;
         }
-        final hashedPassword = repository.hashPassword(pendingPassword!);
 
-        final newUser = UserModel(
+        // Create the account using the FastAPI backend.
+        // This method should also log in and create/link the local user.
+        final newUser = await repository.createAccountWithBackend(
           phone: phone,
-          passwordHash: hashedPassword,
-          createdAt: DateTime.now(),
+          password: password,
         );
 
-        final userId = await repository.createUser(newUser);
+        if (newUser.id == null) {
+          errorMessage = 'Unable to create the local user session.';
+          return false;
+        }
 
-        currentUser = UserModel(
-          id: userId,
-          phone: newUser.phone,
-          passwordHash: newUser.passwordHash,
-          createdAt: newUser.createdAt,
-        );
-
+        currentUser = newUser;
         isLoggedIn = true;
-        await session.saveUserId(userId);
+
+        await session.saveUserId(newUser.id!);
+
         pendingPassword = null;
+
         return true;
       }
 
-
       // LOGIN FLOW
+      // This is OTP login, not password login.
+      // The OTP is currently hardcoded, so this is not real phone verification.
+      final existingUser = await repository.getUserByPhone(phone);
+
       if (existingUser == null) {
         errorMessage =
-        'No account found with this number. Please sign up first.';
+        'No local account found with this number. Please sign up first.';
         return false;
       }
+
       currentUser = existingUser;
       isLoggedIn = true;
 
       if (existingUser.id != null) {
         await session.saveUserId(existingUser.id!);
       }
-      pendingPassword = null;
-      return true;
-    }  catch (e, stackTrace) {
-  debugPrint('========== SIGNUP ERROR ==========');
-  debugPrint('ERROR: $e');
-  debugPrint('STACK TRACE: $stackTrace');
-  debugPrint('===================================');
 
-  errorMessage = 'Authentication failed. Please try again.';
-  return false;
-} finally {
+      pendingPassword = null;
+
+      return true;
+    } catch (e, stackTrace) {
+      debugPrint('========== AUTHENTICATION ERROR ==========');
+      debugPrint('ERROR: $e');
+      debugPrint('STACK TRACE: $stackTrace');
+      debugPrint('==========================================');
+
+      errorMessage = e.toString().replaceFirst('Exception: ', '');
+      return false;
+    } finally {
       isLoading = false;
       notifyListeners();
     }
   }
-
 
   Future<bool>restoreSession() async{
     isLoading = true;
@@ -183,6 +194,7 @@ class AuthController extends ChangeNotifier {
 
 
   Future<void> logout() async {
+    await repository.tokenStorage.clearAccessToken();
     await session.clearSession();
 
     currentUser = null;
@@ -197,52 +209,84 @@ class AuthController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> loginWithPassword(String phone, String password,) async {
+
+  Future<bool> loginWithPassword(
+      String phone,
+      String password,
+      ) async {
     isLoading = true;
     errorMessage = null;
     notifyListeners();
 
     try {
-      final user = await repository.getUserByPhone(phone.trim());
+      final normalizedPhone = phone.trim();
 
-      if (user == null) {
-        errorMessage = 'No account found with this number.';
-        return false;
-      }
-
-      if (user.passwordHash == null || user.passwordHash!.isEmpty) {
-        errorMessage = 'This account does not have a password.';
-        return false;
-      }
-
-      final valid = await repository.verifyPasswordHash(
-        password,
-        user.passwordHash!,
+      // Authenticate with the backend and save the access token.
+      final result = await repository.loginWithBackend(
+        phone: normalizedPhone,
+        password: password,
       );
 
-      if (!valid) {
-        errorMessage = 'Incorrect password.';
-        return false;
+      final profile = result['profile'] as Map<String, dynamic>;
+      final serverUserId = profile['id'];
+
+      if (serverUserId is! String || serverUserId.isEmpty) {
+        throw Exception('The server returned an invalid user ID.');
       }
 
-      currentUser = user;
-      pendingPhone = user.phone;
+      // Find or create the local user and link the backend account.
+      final localUser = await repository.getOrCreateLocalUser(
+        phone: normalizedPhone,
+        serverUserId: serverUserId,
+      );
+
+      final localId = localUser.id;
+
+      if (localId == null) {
+        throw Exception('Local user ID is missing.');
+      }
+
+      // Update the local password hash.
+      final passwordHash = repository.hashPassword(password);
+
+      final rowsUpdated = await repository.updatePassword(
+        localId,
+        passwordHash,
+      );
+
+      if (rowsUpdated == 0) {
+        throw Exception(
+          'Backend login succeeded, but the local password could not be updated.',
+        );
+      }
+
+      // Reload the user after updating the database.
+      final refreshedUser = await repository.getUserById(localId);
+
+      if (refreshedUser == null) {
+        throw Exception('Unable to reload the local user after login.');
+      }
+
+      currentUser = refreshedUser;
+      pendingPhone = normalizedPhone;
       pendingPassword = null;
       isLoggedIn = true;
 
-      if (user.id != null) {
-        await session.saveUserId(user.id!);
-      }
+      await session.saveUserId(localId);
 
       return true;
-    } catch (e) {
-      errorMessage = 'Login failed. Please try again.';
+    } catch (e, stackTrace) {
+      debugPrint('BACKEND LOGIN ERROR: $e');
+      debugPrint('STACK TRACE: $stackTrace');
+
+      errorMessage = e.toString().replaceFirst('Exception: ', '');
       return false;
     } finally {
       isLoading = false;
       notifyListeners();
     }
   }
+
 
   Future<bool>setPassword(String password)async{
     errorMessage = null;
@@ -286,6 +330,8 @@ class AuthController extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+
 
   Future<void> resetAuthenticationData() async {
     await repository.resetDatabase();

@@ -36,20 +36,31 @@ class ExpenseCategorySelector extends StatelessWidget {
     }
   }
 
-  Widget _buildCategoryChip(
-      BuildContext context,
-      String category,
-      ) {
+  Widget _buildCategoryChip(BuildContext context, String category,) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final isSelected = selectedCategory == category;
+    final isAddCategory = category == 'Add Category';
 
-    if (category == 'Add Category') {
+    if (isAddCategory) {
       return ActionChip(
-        avatar: const Icon(
-          Icons.add,
+        avatar: Icon(
+          Icons.add_rounded,
           size: 18,
+          color: colorScheme.primary,
         ),
         label: const Text('Add Category'),
         onPressed: onAddCategory,
+        backgroundColor: colorScheme.primaryContainer.withValues(
+          alpha: theme.brightness == Brightness.dark?0.35:0.65,
+        ),
+        side: BorderSide(
+          color: colorScheme.primary.withValues(alpha: 0.4),
+        ),
+        labelStyle: TextStyle(
+          color: colorScheme.primary,
+          fontWeight: .w600,
+        ),
       );
     }
 
@@ -58,22 +69,48 @@ class ExpenseCategorySelector extends StatelessWidget {
       avatar: Icon(
         _getCategoryIcon(category),
         size: 18,
+        color: isSelected
+        ? colorScheme.onPrimary
+        :colorScheme.onSurfaceVariant,
       ),
       label: Text(category),
       onSelected: (_) {
         onCategorySelected(category);
       },
+      backgroundColor: colorScheme.surfaceContainerLow,
+      selectedColor: const Color(0xFF6557D9),
+      side: BorderSide(
+        color: isSelected
+            ? const Color(0xFF6557D9)
+            : colorScheme.outlineVariant,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      labelStyle: TextStyle(
+        color: isSelected
+            ? Colors.white
+            : colorScheme.onSurface,
+        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+      ),
+      showCheckmark: false,
+      materialTapTargetSize: MaterialTapTargetSize.padded,
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Category',
-          style: Theme.of(context).textTheme.titleMedium,
+          style: theme.textTheme.titleMedium?.copyWith(
+            color: colorScheme.onSurface,
+            fontWeight: FontWeight.w600,
+          ),
         ),
 
         const SizedBox(height: 10),

@@ -10,6 +10,15 @@ class AddBudgetButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    const accentColor = Color(0xFFF2994A);
+
+    const primaryColor = Color(0xFF6557D9);
+
+    final isDark = theme.brightness == Brightness.dark;
+
     return SizedBox(
       width: double.infinity,
       height: 50,
@@ -27,14 +36,20 @@ class AddBudgetButton extends StatelessWidget {
           ),
         ),
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFFFFF1E2),
-          foregroundColor: const Color(0xFFF2994A),
+          backgroundColor: isDark
+              ? colorScheme.surfaceContainer
+              : const Color(0xFFF0EDFF),
+          foregroundColor: isDark
+              ? colorScheme.primary
+              : primaryColor,
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
           ),
           side: BorderSide(
-            color: const Color(0xFFF2994A).withOpacity(0.25),
+            color: isDark
+                ? colorScheme.outlineVariant
+                : primaryColor.withValues(alpha: 0.25),
           ),
         ),
       ),

@@ -10,6 +10,13 @@ class EmptyBudgetState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
+    const primaryColor = Color(0xFF6557D9);
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(
@@ -20,7 +27,7 @@ class EmptyBudgetState extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: const Color(0xFFE5E2EF),
+          color: colorScheme.outlineVariant,
         ),
       ),
       child: Column(
@@ -28,7 +35,9 @@ class EmptyBudgetState extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: const Color(0xFFF0EDFF),
+              color: isDark
+                  ? primaryColor.withValues(alpha: 0.18)
+                  : const Color(0xFFF0EDFF),
               shape: BoxShape.circle,
             ),
             child: const Icon(
@@ -40,13 +49,13 @@ class EmptyBudgetState extends StatelessWidget {
 
           const SizedBox(height: 12),
 
-          const Text(
+          Text(
             'No Category Budgets',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF292747),
-            ),
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: colorScheme.onSurface,
+              ),
           ),
 
           const SizedBox(height: 5),
@@ -55,12 +64,13 @@ class EmptyBudgetState extends StatelessWidget {
             'Create budgets for categories like Food,\n'
                 'Transport, Shopping and more.',
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 12,
-              height: 1.4,
-              color: Colors.grey.shade600,
+            style: theme.textTheme.bodySmall?.copyWith(
+            fontSize: 12,
+            height: 1.4,
+            color: colorScheme.onSurfaceVariant,
             ),
-          ),
+            ),
+
 
           const SizedBox(height: 16),
 
@@ -77,9 +87,9 @@ class EmptyBudgetState extends StatelessWidget {
               ),
             ),
             style: OutlinedButton.styleFrom(
-              foregroundColor: const Color(0xFF6557D9),
-              side: const BorderSide(
-                color: Color(0xFF6557D9),
+              foregroundColor: colorScheme.primary,
+              side: BorderSide(
+                color: colorScheme.primary,
               ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),

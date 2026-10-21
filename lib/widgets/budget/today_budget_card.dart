@@ -16,25 +16,43 @@ class TodayBudgetCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
     final hasBudget = budget > 0;
+
+    // Use a deeper gradient in dark mode.
+    final gradientColors = isDark
+        ? const [
+      Color(0xFF302956),
+      Color(0xFF453B75),
+    ]
+        : const [
+      Color(0xFF6557D9),
+      Color(0xFF8174EC),
+    ];
+
+    final secondaryTextColor = Colors.white.withValues(
+      alpha: isDark ? 0.82 : 0.78,
+    );
 
     return Container(
       width: double.infinity,
       height: 112,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [
-            Color(0xFF6557D9),
-            Color(0xFF8174EC),
-          ],
+        gradient: LinearGradient(
+          colors: gradientColors,
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF6557D9).withOpacity(0.16),
+            color: const Color(0xFF6557D9).withValues(
+              alpha: isDark ? 0.10 : 0.16,
+            ),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -43,14 +61,16 @@ class TodayBudgetCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
+          // Header.
           Row(
             children: [
               Container(
                 width: 34,
                 height: 34,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.16),
+                  color: Colors.white.withValues(
+                    alpha: isDark ? 0.10 : 0.16,
+                  ),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(
@@ -76,10 +96,11 @@ class TodayBudgetCard extends StatelessWidget {
               ),
 
               SizedBox(
-                width: 26,
-                height: 26,
+                width: 30,
+                height: 30,
                 child: IconButton(
                   padding: EdgeInsets.zero,
+                  tooltip: hasBudget ? 'Edit budget' : 'Add budget',
                   onPressed: onEdit,
                   icon: Icon(
                     hasBudget
@@ -95,7 +116,7 @@ class TodayBudgetCard extends StatelessWidget {
 
           const Spacer(),
 
-          // Amount
+          // Budget amount and remaining balance.
           if (hasBudget) ...[
             Text(
               '₹${budget.toStringAsFixed(0)}',
@@ -112,10 +133,14 @@ class TodayBudgetCard extends StatelessWidget {
               isExceeded
                   ? '₹${remaining.abs().toStringAsFixed(0)} over budget'
                   : '₹${remaining.toStringAsFixed(0)} remaining',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.w500,
-                color: Colors.white.withOpacity(0.78),
+                color: isExceeded
+                    ? const Color(0xFFFFB8B8)
+                    : secondaryTextColor,
               ),
             ),
           ] else ...[
@@ -134,7 +159,7 @@ class TodayBudgetCard extends StatelessWidget {
               'Set a limit for today',
               style: TextStyle(
                 fontSize: 10,
-                color: Colors.white.withOpacity(0.78),
+                color: secondaryTextColor,
               ),
             ),
           ],

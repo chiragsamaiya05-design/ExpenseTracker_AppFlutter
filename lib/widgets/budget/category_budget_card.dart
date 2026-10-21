@@ -62,18 +62,26 @@ class CategoryBudgetCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: categoryColor.withOpacity(0.18),
+          color: categoryColor.withValues(
+            alpha: isDark ? 0.35 : 0.22,
+          ),
         ),
         boxShadow: [
           BoxShadow(
-            color: categoryColor.withOpacity(0.06),
+            color: Colors.black.withValues(
+              alpha: isDark ? 0.12 : 0.025,
+            ),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -82,13 +90,15 @@ class CategoryBudgetCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
+          // Category header.
           Row(
             children: [
               Container(
                 padding: const EdgeInsets.all(9),
                 decoration: BoxDecoration(
-                  color: categoryColor.withOpacity(0.12),
+                  color: categoryColor.withValues(
+                    alpha: isDark ? 0.20 : 0.12,
+                  ),
                   borderRadius: BorderRadius.circular(11),
                 ),
                 child: Icon(
@@ -103,18 +113,20 @@ class CategoryBudgetCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   category,
-                  style: const TextStyle(
-                    fontSize: 16,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF292747),
+                    color: colorScheme.onSurface,
                   ),
                 ),
               ),
 
               PopupMenuButton<String>(
-                icon: const Icon(
+                tooltip: 'Budget options',
+                icon: Icon(
                   Icons.more_vert_rounded,
-                  color: Color(0xFF77747F),
+                  color: colorScheme.onSurfaceVariant,
                 ),
                 onSelected: (value) {
                   if (value == 'edit') {
@@ -123,14 +135,35 @@ class CategoryBudgetCard extends StatelessWidget {
                     onDelete?.call();
                   }
                 },
-                itemBuilder: (context) => const [
-                  PopupMenuItem(
+                itemBuilder: (context) => [
+                  const PopupMenuItem<String>(
                     value: 'edit',
-                    child: Text('Edit'),
+                    child: Row(
+                      children: [
+                        Icon(Icons.edit_rounded, size: 18),
+                        SizedBox(width: 10),
+                        Text('Edit'),
+                      ],
+                    ),
                   ),
-                  PopupMenuItem(
+                  PopupMenuItem<String>(
                     value: 'delete',
-                    child: Text('Delete'),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.delete_outline_rounded,
+                          size: 18,
+                          color: colorScheme.error,
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          'Delete',
+                          style: TextStyle(
+                            color: colorScheme.error,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -139,35 +172,43 @@ class CategoryBudgetCard extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          // Amount
+          // Spending amount and budget limit.
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(
-                '₹${spent.toStringAsFixed(0)}',
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF292747),
+              Flexible(
+                child: Text(
+                  '₹${spent.toStringAsFixed(0)}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: colorScheme.onSurface,
+                  ),
                 ),
               ),
 
               const SizedBox(width: 5),
 
-              Text(
-                '/ ₹${budget.toStringAsFixed(0)}',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Colors.grey.shade600,
+              Flexible(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 3),
+                  child: Text(
+                    '/ ₹${budget.toStringAsFixed(0)}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
                 ),
               ),
 
-              const Spacer(),
+              const SizedBox(width: 8),
 
               Text(
                 '${(progress * 100).toStringAsFixed(0)}%',
-                style: TextStyle(
-                  fontSize: 13,
+                style: theme.textTheme.labelLarge?.copyWith(
                   fontWeight: FontWeight.w700,
                   color: progressColor,
                 ),
@@ -177,13 +218,15 @@ class CategoryBudgetCard extends StatelessWidget {
 
           const SizedBox(height: 10),
 
-          // Progress bar
+          // Spending progress.
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
             child: LinearProgressIndicator(
               value: progress,
               minHeight: 8,
-              backgroundColor: categoryColor.withOpacity(0.10),
+              backgroundColor: colorScheme.onSurface.withValues(
+                alpha: isDark ? 0.10 : 0.07,
+              ),
               valueColor: AlwaysStoppedAnimation<Color>(
                 progressColor,
               ),
@@ -192,7 +235,7 @@ class CategoryBudgetCard extends StatelessWidget {
 
           const SizedBox(height: 10),
 
-          // Remaining / exceeded
+          // Remaining or exceeded amount.
           Row(
             children: [
               Icon(
@@ -205,14 +248,15 @@ class CategoryBudgetCard extends StatelessWidget {
 
               const SizedBox(width: 6),
 
-              Text(
-                isOverBudget
-                    ? '₹${remaining.abs().toStringAsFixed(0)} over budget'
-                    : '₹${remaining.toStringAsFixed(0)} remaining',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: progressColor,
+              Expanded(
+                child: Text(
+                  isOverBudget
+                      ? '₹${remaining.abs().toStringAsFixed(0)} over budget'
+                      : '₹${remaining.toStringAsFixed(0)} remaining',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: progressColor,
+                  ),
                 ),
               ),
             ],

@@ -11,11 +11,60 @@ class ExpenseDatePicker extends StatelessWidget {
   });
 
   Future<void> _selectDate(BuildContext context) async {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     final pickedDate = await showDatePicker(
       context: context,
       initialDate: selectedDate,
       firstDate: DateTime(2000),
       lastDate: DateTime.now(),
+      builder: (context, child) {
+        return Theme(
+          data: theme.copyWith(
+            colorScheme: colorScheme.copyWith(
+              primary: const Color(0xFF6557D9),
+              onPrimary: Colors.white,
+              surface: colorScheme.surface,
+              onSurface: colorScheme.onSurface,
+            ),
+            datePickerTheme: DatePickerThemeData(
+              backgroundColor: colorScheme.surface,
+              headerBackgroundColor: colorScheme.primary,
+              headerForegroundColor: colorScheme.onPrimary,
+              todayForegroundColor: WidgetStatePropertyAll(
+                colorScheme.primary,
+              ),
+              todayBorder: BorderSide(
+                color: colorScheme.primary,
+              ),
+              dayForegroundColor: WidgetStateProperty.resolveWith(
+                    (states) {
+                  if (states.contains(WidgetState.selected)) {
+                    return Colors.white;
+                  }
+                  return colorScheme.onSurface;
+                },
+              ),
+              dayBackgroundColor: WidgetStateProperty.resolveWith(
+                    (states) {
+                  if (states.contains(WidgetState.selected)) {
+                    return const Color(0xFF6557D9);
+                  }
+                  return null;
+                },
+              ),
+              cancelButtonStyle: TextButton.styleFrom(
+                foregroundColor: colorScheme.primary,
+              ),
+              confirmButtonStyle: TextButton.styleFrom(
+                foregroundColor: colorScheme.primary,
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
 
     if (pickedDate == null) return;
@@ -31,50 +80,69 @@ class ExpenseDatePicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Date',
-          style: Theme.of(context).textTheme.titleMedium,
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: colorScheme.onSurface,
+          ),
         ),
 
         const SizedBox(height: 8),
 
-        InkWell(
-          borderRadius: BorderRadius.circular(12),
-          onTap: () => _selectDate(context),
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 16,
-            ),
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: Theme.of(context).colorScheme.outline,
+        Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(14),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(14),
+            onTap: () => _selectDate(context),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 16,
               ),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.calendar_today),
-
-                const SizedBox(width: 12),
-
-                Text(
-                  _formatDate(selectedDate),
-                  style: const TextStyle(
-                    fontSize: 16,
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceContainerHighest.withValues(
+                  alpha: theme.brightness == Brightness.dark ? 0.35 : 0.45,
+                ),
+                border: Border.all(
+                  color: colorScheme.outlineVariant,
+                ),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.calendar_month_rounded,
+                    color: colorScheme.primary,
+                    size: 22,
                   ),
-                ),
 
-                const Spacer(),
+                  const SizedBox(width: 12),
 
-                const Icon(
-                  Icons.keyboard_arrow_down,
-                ),
-              ],
+                  Expanded(
+                    child: Text(
+                      _formatDate(selectedDate),
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w500,
+                        color: colorScheme.onSurface,
+                      ),
+                    ),
+                  ),
+
+                  Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ],
+              ),
             ),
           ),
         ),

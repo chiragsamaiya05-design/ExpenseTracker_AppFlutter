@@ -24,6 +24,8 @@ class ExpensesDatabase {
     final data = expense.toMap();
 
     data['user_id'] = userId;
+    data['server_id'] = expense.serverId;
+    data['is_synced'] = expense.isSynced ? 1 : 0;
 
     return await db.insert(
       'expense',
@@ -47,6 +49,8 @@ class ExpensesDatabase {
     final data = expense.toMap();
 
     data.remove('user_id');
+    data['server_id'] = expense.serverId;
+    data['is_synced'] = 0;
 
     return await db.update(
       'expense',

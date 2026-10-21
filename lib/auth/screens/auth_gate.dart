@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../controllers/auth_controller.dart';
 import 'login_screen.dart';
-import '../../Screens/home/main_navigation_screen.dart';
+import '../../user_providers.dart';
 
 class AuthGate extends StatefulWidget {
   const AuthGate({super.key});
@@ -18,6 +18,8 @@ class _AuthGateState extends State<AuthGate> {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
       context.read<AuthController>().restoreSession();
     });
   }
@@ -39,6 +41,8 @@ class _AuthGateState extends State<AuthGate> {
       return const LoginScreen();
     }
 
-    return const MainNavigationScreen();
+    return UserProviders(
+      userId: authController.currentUser!.id!,
+    );
   }
 }

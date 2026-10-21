@@ -16,66 +16,89 @@ class IncomeExpenseCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isIncome = title == 'Income';
-    return InkWell(
-      onTap: onTap,
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
+    final bool isIncome = title.toLowerCase() == 'income';
+
+    // Keep the existing color parameter while adapting it to dark mode.
+    final cardColor = isDark
+        ? Color.lerp(color, colorScheme.surface, 0.78)!
+        : color;
+
+    final accentColor = isIncome
+        ? const Color(0xFF2EAD69)
+        : const Color(0xFFE45C68);
+
+    final textColor = isDark
+        ? colorScheme.onSurface
+        : colorScheme.onSurface;
+
+    return Material(
+      color: cardColor,
       borderRadius: BorderRadius.circular(16),
-
-      child: Card(
-        elevation: 0,
-        margin: EdgeInsets.zero,
-        color: color,
-
-        shape: RoundedRectangleBorder(
-          borderRadius: .circular(16),
-        ),
-
-        child: Padding(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
           padding: const EdgeInsets.all(16),
-
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: colorScheme.outlineVariant.withValues(
+                alpha: isDark ? 0.6 : 0.35,
+              ),
+            ),
+          ),
           child: Column(
-            mainAxisAlignment:.center ,
-            crossAxisAlignment: .start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-
                 children: [
                   Container(
                     padding: const EdgeInsets.all(7),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.7),
+                      color: isDark
+                          ? accentColor.withValues(alpha: 0.16)
+                          : Colors.white.withValues(alpha: 0.75),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       isIncome
                           ? Icons.arrow_downward_rounded
                           : Icons.arrow_upward_rounded,
-
                       size: 18,
-
-                      color: isIncome
-                          ? Colors.green.shade700
-                          : Colors.red.shade700,
+                      color: accentColor,
                     ),
                   ),
-                  const SizedBox(width: 8,),
 
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
+                  const SizedBox(width: 8),
+
+                  Expanded(
+                    child: Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: textColor,
+                      ),
                     ),
                   ),
                 ],
               ),
+
               const SizedBox(height: 10),
 
               Text(
                 '₹${amount.toStringAsFixed(2)}',
-                style: const TextStyle(
-                  fontSize: 12,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
+                  color: textColor,
                 ),
               ),
             ],
