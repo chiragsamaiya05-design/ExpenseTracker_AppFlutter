@@ -23,7 +23,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  bool isOtpSelected = true;
+  bool isOtpSelected = false;
 
   String? phoneError;
   String? passwordError;
@@ -271,22 +271,8 @@ Future<void> _loginWithPassword() async {
                       );
                     },
                   ),
-                  ElevatedButton(
-                    onPressed: () async {
-                      await context
-                          .read<AuthController>()
-                          .resetAuthenticationData();
 
-                      if (!context.mounted) return;
 
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Authentication database reset'),
-                        ),
-                      );
-                    },
-                    child: const Text('Reset Authentication Data'),
-                  )
                 ],
               ),
             ),

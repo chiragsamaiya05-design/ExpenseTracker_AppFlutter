@@ -26,16 +26,17 @@ class UserDatabase {
     return await databaseFactory.openDatabase(
       path,
       options: OpenDatabaseOptions(
-        version: 3,
+        version: 4,
         onCreate: (db, version) async {
           await db.execute('''
-          CREATE TABLE users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            phone TEXT UNIQUE NOT NULL,
-            password_hash TEXT,
-            created_at TEXT NOT NULL
-          )
-        ''');
+        `CREATE TABLE users (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          phone TEXT UNIQUE NOT NULL,
+          password_hash TEXT,
+          server_user_id TEXT,
+          created_at TEXT NOT NULL
+        )
+      ''');
 
 
         },
@@ -46,6 +47,12 @@ class UserDatabase {
             await db.execute('''
             ALTER TABLE users
             ADD COLUMN password_hash TEXT
+          ''');
+          }
+          if (oldVersion < 4) {
+            await db.execute('''
+            ALTER TABLE users
+            ADD COLUMN server_user_id TEXT
           ''');
           }
         },
@@ -64,6 +71,40 @@ class UserDatabase {
       conflictAlgorithm: ConflictAlgorithm.abort,
     );
     return userId;
+  }
+
+  Future<int> updateServerUserId(
+      int localUserId,
+      String serverUserId,
+      ) async {
+    final db = await database;
+
+    return db.update(
+      'users',
+      {
+        'server_user_id': serverUserId,
+      },
+      where: 'id = ?',
+      whereArgs: [localUserId],
+    );
+  }
+
+  Future<String?> getServerUserId(int localUserId) async {
+    final db = await database;
+
+    final result = await db.query(
+      'users',
+      columns: ['server_user_id'],
+      where: 'id = ?',
+      whereArgs: [localUserId],
+      limit: 1,
+    );
+
+    if (result.isEmpty) {
+      return null;
+    }
+
+    return result.first['server_user_id'] as String?;
   }
 
   Future<UserModel?> getUserByPhone(String phone) async {

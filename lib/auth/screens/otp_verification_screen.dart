@@ -8,10 +8,9 @@ import '../widgets/auth_header.dart';
 import '../widgets/change_number_button.dart';
 import '../widgets/login_button.dart';
 import '../widgets/otp_section.dart';
+
 import 'auth_gate.dart';
 import 'login_screen.dart';
-import 'signup_screen.dart';
-import '../../Screens/home/main_navigation_screen.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
   final String phone;
@@ -45,6 +44,7 @@ class _OtpVerificationScreenState
   );
 
   Timer? _resendTimer;
+
   int resendSeconds = 30;
 
   @override
@@ -52,11 +52,10 @@ class _OtpVerificationScreenState
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _startResendTimer();
+      if (!mounted) return;
 
-      if (mounted) {
-        otpFocusNodes.first.requestFocus();
-      }
+      _startResendTimer();
+      otpFocusNodes.first.requestFocus();
     });
   }
 
@@ -91,6 +90,12 @@ class _OtpVerificationScreenState
           builder: (_) => const AuthGate(),
         ),
             (route) => false,
+      );
+    } else if (auth.errorMessage != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(auth.errorMessage!),
+        ),
       );
     }
   }
@@ -133,13 +138,27 @@ class _OtpVerificationScreenState
     final auth = context.read<AuthController>();
 
     if (widget.isSignup) {
-      if (widget.password == null || widget.password!.isEmpty) {
+      // Recover the password from AuthController, where
+      // startSignup() originally stored it.
+      final password = auth.pendingPassword;
+
+      if (password == null || password.isEmpty) {
+        auth.clearError();
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Signup information is missing. Please start signup again.',
+            ),
+          ),
+        );
+
         return;
       }
 
       auth.startSignup(
         widget.phone,
-        widget.password!,
+        password,
       );
     } else {
       auth.startLogin(widget.phone);
@@ -155,7 +174,8 @@ class _OtpVerificationScreenState
 
     otpFocusNodes.first.requestFocus();
 
-    debugPrint('OTP resent to ${widget.phone}');
+    // Development-only OTP: no real SMS is sent.
+    debugPrint('OTP resend requested for ${widget.phone}');
   }
 
   void _changeNumber() {

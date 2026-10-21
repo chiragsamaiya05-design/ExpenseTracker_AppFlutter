@@ -122,5 +122,19 @@ class DatabaseMigrations {
       )
     ''');
     }
+    if(oldVersion<9){
+      final columns = await db.rawQuery(
+        "PRAGMA table_info(expense)",
+      );
+      final existingColumns = columns
+          .map((column) => column['name'] as String)
+          .toSet();
+      if (!existingColumns.contains('server_id')) {
+        await db.execute( 'ALTER TABLE expense ADD COLUMN server_id TEXT', );
+      }
+      if (!existingColumns.contains('is_synced')) {
+        await db.execute( 'ALTER TABLE expense ADD COLUMN is_synced INTEGER NOT NULL DEFAULT 0', );
+      }
+    }
   }
 }

@@ -6,7 +6,9 @@ class DatabaseTables {
       title TEXT,
       amount REAL,
       category TEXT,
-      date TIMESTAMP
+      date TIMESTAMP,
+      server_id TEXT, 
+      is_synced INTEGER NOT NULL DEFAULT 0
     )
   ''';
 

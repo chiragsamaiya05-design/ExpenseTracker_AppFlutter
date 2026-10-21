@@ -9,18 +9,31 @@ import 'auth/controllers/auth_controller.dart';
 import 'auth/database/user_database.dart';
 import 'auth/repositories/auth_repository.dart';
 import 'auth/services/auth_session.dart';
+import 'auth/services/auth_api_service.dart';
+import 'auth/services/auth_token_storage.dart';
 import 'controllers/theme_controller.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Initialize SQLite for desktop platforms.
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
   }
 
+  // Initialize the local user database.
   final userDatabase = UserDatabase();
 
+  // Configure the FastAPI backend.
+  final authApi = AuthApiService(
+    baseUrl: 'http://127.0.0.1:8000/api/v1',
+  );
+
+  // Securely store the backend access token.
+  final tokenStorage = AuthTokenStorage();
+
+  // Initialize the app and inject dependencies.
   runApp(
     MultiProvider(
       providers: [
@@ -28,6 +41,8 @@ void main() async {
           create: (_) => AuthController(
             repository: AuthRepository(
               database: userDatabase,
+              api: authApi,
+              tokenStorage: tokenStorage,
             ),
             session: AuthSession(),
           ),
@@ -50,8 +65,6 @@ class ExpenseTracker extends StatelessWidget {
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-
-
       themeMode: themeController.themeMode,
 
       // Light theme.

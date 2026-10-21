@@ -7,6 +7,8 @@ import '../../controllers/theme_controller.dart';
 import '../../widgets/settings/settings_section.dart';
 import '../../widgets/settings/settings_tile.dart';
 import 'appearance_screen.dart';
+import '../../auth/controllers/auth_controller.dart';
+import 'cloud_sync_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -162,7 +164,14 @@ class SettingsScreen extends StatelessWidget {
                   icon: Icons.backup_outlined,
                   title: 'Backup & Restore',
                   subtitle: 'Protect and restore your data',
-                  onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const CloudSyncScreen(),
+                        ),
+                      );
+                    },
                 ),
 
                 SettingsTile(
@@ -268,10 +277,19 @@ class SettingsScreen extends StatelessWidget {
                 backgroundColor: colorScheme.error,
                 foregroundColor: colorScheme.onError,
               ),
-              onPressed: () {
-                Navigator.pop(context);
+              onPressed: () async {
+                // Close the logout confirmation dialog.
+                Navigator.of(context).pop();
 
-                // Connect your AuthController logout here.
+                // Clear the authentication session.
+                await context.read<AuthController>().logout();
+
+                if (!context.mounted) return;
+
+                // Remove protected screens and return to AuthGate.
+                Navigator.of(context).popUntil(
+                      (route) => route.isFirst,
+                );
               },
               child: const Text('Logout'),
             ),
